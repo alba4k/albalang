@@ -1,7 +1,7 @@
-CC := gcc
+CC := clang
 CFLAGS := -Wall -Wextra -O2
 
-OBJ := obj/main.o obj/utils.o obj/stdlib.o
+OBJ := obj/main.o obj/utils.o obj/stdlib.o obj/variables.o
 
 build/albalang: $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) -o build/albalang
@@ -14,6 +14,9 @@ obj/utils.o: src/utils.c
 
 obj/stdlib.o: src/stdlib.c
 	$(CC) $(CLAGS) -c src/stdlib.c -o obj/stdlib.o
+
+obj/variables.o: src/variables.c
+	$(CC) $(CLAGS) -c src/variables.c -o obj/variables.o
 
 clean:
 	rm -rf obj/* build/*
