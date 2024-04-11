@@ -40,8 +40,7 @@ int main(int argc, char **argv) {
             *endline = ';';
 
             // line formatting
-            while(line[0] == ' ' || line[0] == '\n')
-                line++;
+            line = skip_white(line);
             char *ptr;
             if((ptr = strchr(line, ';')))
                 ptr[1] = 0;
