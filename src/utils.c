@@ -58,9 +58,8 @@ char *skip_whites(char *ptr) {
     if(!ptr[0])
         return NULL;
 
-    ++ptr;
     while(*ptr) {
-        if(*ptr != ' ' || *ptr != '\n')
+        if(*ptr != ' ' && *ptr != '\n')
             return ptr;
         ++ptr;
     }
@@ -74,7 +73,6 @@ char *skip_full(char *ptr) {
     if(!ptr[0])
         return NULL;
 
-    ++ptr;
     while(*ptr) {
         if(*ptr == ' ' || *ptr == '\n')
             return ptr;
@@ -93,16 +91,17 @@ int eval(const char *code) {
         if((ptr = strstr(code, functions[i].name))) {
             ptr += strlen(functions[i].name);
 
-            char *args = strchr(ptr, '(');
-            if(!args)
+            char *args = skip_whites(ptr);
+            if(args[0] != '(')
                 return -1;
             ++args;
             
             char *argend = strchr(args, ')');
             if(!argend)
                 return -1;
-            
+                
             *argend = 0;
+            
             ret = functions[i].func(args);
             *argend = ')';
             return ret;
@@ -137,32 +136,14 @@ int eval(const char *code) {
             ptr2 = skip_whites(ptr3);
 
             // `"80.9"`
-            if(strncmp(ptr2, "<-", 2))
+            if(ptr2[0] != '=')
                 return -1;
-            ptr2+=2;
+            ++ptr2;
             ptr3 = skip_whites(ptr2);
 
             // create a variable with [name] and [value]
-            if(*ptr3 != '"')
-                return -1;
-            ++ptr3;
-
-            ptr2 = strchr(ptr3, '"');
-            if(!ptr2)
-                return -1;
-            *ptr2 = 0;
+            Number *new = add_num(&num_head, name, atof(ptr3));
             
-            // reach the end of the linked list
-            Number *end = &num_head;
-
-            while(end->next != NULL)
-                end = end->next;
-            
-            Number *new = add_num(end, name, atof(ptr3));
-            
-            // REMOVE
-            printf("%s - %f\n", new->name, new->value);
-
             *ptr2 = '"';
         }
         if(!strncmp(ptr2, "str", 3)) {
@@ -186,9 +167,9 @@ int eval(const char *code) {
             ptr2 = skip_whites(ptr3);
 
             // `"80.9"`
-            if(strncmp(ptr2, "<-", 2))
+            if(ptr2[0] != '=')
                 return -1;
-            ptr2+=2;
+            ++ptr2;
             ptr3 = skip_whites(ptr2);
 
             // create a variable with [name] and [value]
@@ -201,16 +182,7 @@ int eval(const char *code) {
                 return -1;
             *ptr2 = 0;
             
-            // reach the end of the linked list
-            String *end = &str_head;
-
-            while(end->next != NULL)
-                end = end->next;
-            
-            String *new = add_str(end, name, ptr3);
-            
-            // REMOVE
-            printf("%s - %s\n", new->name, new->value);
+            String *new = add_str(&str_head, name, ptr3);
 
             *ptr2 = '"';
         }

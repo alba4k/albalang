@@ -1,7 +1,14 @@
-# var type name <- "value";
+var type name = "value";
 
-var num value <- "3";
-var str string <- "ciao";
-var str string2 <- "ciao";
+var num value = 3  ;
+var str string = "ciao";
+var str string2 = "hello";
 
-print("${num}");
+print(${value}, 0);
+print(${string2});
+
+print(${string});
+
+delete(string);
+
+print(${string});

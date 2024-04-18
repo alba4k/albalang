@@ -4,7 +4,6 @@
 - [ ] Variables
       * str
       * num
-      * bool
 - [ ] Branching
 - [ ] Looping
 

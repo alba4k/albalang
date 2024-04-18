@@ -5,9 +5,9 @@
 
 struct function {
     char *name;
-    const int (*func)(char *);
+    int (*func)(char *);
 };
 
-extern const struct function functions[1];
+extern const struct function functions[2];
 
 #endif // STDLIB_H

@@ -16,7 +16,13 @@ String str_head = {
     NULL,
 };
 
-Number *add_num(Number *last, char *name, double value) {
+Number *add_num(Number *head, char *name, double value) {
+    // reach the end of the linked list
+    Number *last = head;
+
+    while(last->next != NULL)
+        last = last->next;
+
     Number *new = malloc(sizeof(Number));
 
     strncpy(new->name, name, sizeof(new->name));
@@ -33,7 +39,13 @@ Number *add_num(Number *last, char *name, double value) {
     return new;
 }
 
-String *add_str(String *last, char *name, char *value) {
+String *add_str(String *head, char *name, char *value) {
+    // reach the end of the linked list
+    String *last = head;
+
+    while(last->next != NULL)
+        last = last->next;
+            
     String *new = malloc(sizeof(String));
 
     strncpy(new->name, name, sizeof(new->name));
@@ -83,4 +95,22 @@ String *del_str(String *var) {
     free(var);
 
     return 0;
+}
+#include <stdio.h>
+Number *find_num(Number *head, char *name) {
+    for(Number *current = head->next; current != NULL; current = current->next) {
+        if(strcmp(current->name, name) == 0)
+            return current;
+    }
+
+    return NULL;
+}
+
+String *find_str(String *head, char *name) {
+    for(String *current = head->next; current != NULL; current = current->next) {
+        if(strcmp(current->name, name) == 0)
+            return current;
+    }
+
+    return NULL;
 }

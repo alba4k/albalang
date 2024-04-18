@@ -24,9 +24,9 @@ typedef struct String String;
 extern struct Number num_head;
 extern struct String str_head;
 
-Number *add_num(struct Number *last, char *name, double value);
+Number *add_num(struct Number *head, char *name, double value);
 
-String *add_str(struct String *last, char *name, char *value);
+String *add_str(struct String *head, char *name, char *value);
 
 Number *edit_num(struct Number *var, double value);
 
@@ -35,5 +35,9 @@ String *edit_str(String *var, char *value);
 Number *del_num(struct Number *var);
 
 String *del_str(struct String *var);
+
+Number *find_num(Number *head, char *name);
+
+String *find_str(String *head, char *name);
 
 #endif // VARIABLES_H

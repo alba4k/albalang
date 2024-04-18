@@ -40,13 +40,12 @@ int main(int argc, char **argv) {
             *endline = ';';
 
             // line formatting
-            line = skip_white(line);
+            line = skip_whites(line);
             char *ptr;
             if((ptr = strchr(line, ';')))
                 ptr[1] = 0;
 
-
-            error("And error occurred while running the following line:", line, -1, code, num_head.next, str_head.next);
+            error("And error occurred while running the following line:", skip_whites(line), -1, code, num_head.next, str_head.next);
         }
 
         *endline = ';';
