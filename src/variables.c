@@ -96,7 +96,7 @@ String *del_str(String *var) {
 
     return 0;
 }
-#include <stdio.h>
+
 Number *find_num(Number *head, char *name) {
     for(Number *current = head->next; current != NULL; current = current->next) {
         if(strcmp(current->name, name) == 0)

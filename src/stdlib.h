@@ -4,7 +4,7 @@
 #define STDLIB_H
 
 struct function {
-    char *name;
+    const char *name;
     int (*func)(char *);
 };
 

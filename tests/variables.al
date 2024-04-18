@@ -11,4 +11,4 @@ print(${string});
 
 delete(string);
 
-print(${string});
+#print(${string});

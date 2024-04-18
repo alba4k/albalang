@@ -9,15 +9,15 @@
 int main(int argc, char **argv) {
     // guards against incorrect usage
     if(argc < 2)
-        error("Usage: albalang <file>.al.", NULL, 1, NULL, NULL, NULL);
+        error("Usage: albalang <file>.al.", NULL, 1, NULL);
 
     if(access(argv[1], F_OK))
-        error("This file does not exist:", argv[1], 2, NULL, NULL, NULL);
+        error("This file does not exist:", argv[1], 2, NULL);
 
     // open the file
     FILE *fp = fopen(argv[1], "r");
     if(!fp)
-        error("The file could not be opened.", argv[1], 3, NULL, NULL, NULL);
+        error("The file could not be opened.", argv[1], 3, NULL);
 
     // get the size of the file
     fseek(fp, 0, SEEK_END);
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
             if((ptr = strchr(line, ';')))
                 ptr[1] = 0;
 
-            error("And error occurred while running the following line:", skip_whites(line), -1, code, num_head.next, str_head.next);
+            error("And error occurred while running the following line:", skip_whites(line), -1, code);
         }
 
         *endline = ';';

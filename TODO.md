@@ -1,9 +1,10 @@
 - [x] Hello World
 - [x] Comments
 
-- [ ] Variables
+- [x] Variables
       * str
       * num
+
 - [ ] Branching
 - [ ] Looping
 

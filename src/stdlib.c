@@ -104,23 +104,13 @@ int fn_delete(char *name) {
     char cache = *end;
     *end = 0;
 
-    Number *nvar = NULL;
+    Number *nvar = find_num(&num_head, name);
     String *svar = NULL;
-    for(Number *current = num_head.next; current; current = current->next)
-        if(!strcmp(name, current->name)) {
-            nvar = current;
-            break;
-        }
-    if(!nvar) {
-        for(String *current = str_head.next; current; current = current->next)
-            if(!strcmp(name, current->name)) {
-                svar = current;
-                break;
-            }
-    }
-    if(!svar) {
+    if(!nvar)
+        svar = find_str(&str_head, name);
+
+    if(!svar)
         return -1;
-    }
     
     if(nvar)
         del_num(nvar);
