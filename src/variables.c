@@ -22,7 +22,7 @@ Variable *add_var(Variable *head, char *name, double *num, char *str) {
     Variable *new = malloc(sizeof(Variable));
 
     #ifdef DEBUG
-    debug_log("Creating variable %s (at %p, with value %f or %s)", name, new, num ? *num : -1, str);
+    debug_log("Creating variable %s (%p, value: %f or %s)", name, new, num ? *num : 0, str);
     #endif // DEBUG
 
     new->name = malloc(sizeof(name)+1);
@@ -52,7 +52,7 @@ Variable *add_var(Variable *head, char *name, double *num, char *str) {
 
 Variable *edit_var(Variable *var, char *str, double *num) {
     #ifdef DEBUG
-    debug_log("Changing variable %s (at %p, %f -> %f or %s -> %s)", var->name, var, var->number ? *(var->number) : -1, num ? *num : -1, var->string, str);
+    debug_log("Changing variable %s (%p, %f -> %f or %s -> %s)", var->name, var, var->number ? *(var->number) : 0, num ? *num : 0, var->string, str);
     #endif // DEBUG
 
     if(num != NULL) {
@@ -71,7 +71,7 @@ int del_var(Variable *var) {
         return -1;
 
     #ifdef DEBUG
-    debug_log("Deleting variable %s (at %p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
+    debug_log("Deleting variable %s (%p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
     #endif // DEBUG
 
     var->prev->next = var->next;

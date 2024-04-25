@@ -47,3 +47,8 @@ struct Variable {
     struct Variable *next;
 };
 ```
+- Non è più necessario specificare il tipo di una variabile, è sufficiente mettere o no le virgolette.
+```albalang
+var abc = "ciao";
+var 123 = 1.23;
+```

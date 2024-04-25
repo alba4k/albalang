@@ -1,8 +1,8 @@
-#var type name = "value";
+#var name = "value";
 
-var num value = 3  ;
-var str string = "ciao";
-var str string2 = "hello";
+var value = 3  ;
+var string = "ciao";
+var string2 = "hello";
 
 print(${value}, 0);
 print(${string2});

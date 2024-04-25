@@ -83,13 +83,15 @@ char *skip_full(char *ptr) {
     return NULL;
 }
 
-int eval(const char *code) {
+int eval(char *code) {
     #ifdef DEBUG
     debug_log("Running a new line");
     #endif // DEBUG
 
     char *ptr;
-    int ret = 0;
+    int ret = 1;
+
+    code = skip_whites(code);
 
     // functions belonging to stdlib
     for(size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); i++) {
@@ -113,83 +115,59 @@ int eval(const char *code) {
         }
     }
 
-    // we have something like `  var num variable = 80.9  `
-    if((ptr = strstr(code, "var"))) {
-        // `num variable = 80.9`
-        char *ptr2 = skip_whites(ptr+3);
+    // we have something like `  var variable = 80.9  `
+    if(!strncmp(code, "var", 3)) {
+        // `variable = 80.9`
+        ptr = skip_whites(code+3);
+        if(!ptr)
+            return -1;
+
+        ptr = skip_whites(ptr);
+        if(!ptr)
+            return -1;
+            
+        // `= 80.9`
+        char *ptr2 = skip_full(ptr);
         if(!ptr2)
             return -1;
-        
-        if(!strncmp(ptr2, "num", 3)) {
-            // ` variable = 80.9`
-            ptr2 += 3;
+        char cache = *ptr2;
+        *ptr2 = 0;
+        char *name = ptr;
+        ptr = skip_whites(ptr2+1);
 
-            // `variable = 80.9`
-            ptr2 = skip_whites(ptr2);
-            if(!ptr2)
-                return -1;
-
-            // `= 80.9`
-            char name[32];
-            char *ptr3 = skip_full(ptr2);
-            if(!ptr3)
-                return -1;
-            char cache = *ptr3;
-            *ptr3 = 0;
-            strncpy(name, ptr2, 32);
-            *ptr3 = cache;
-            ptr2 = skip_whites(ptr3);
-
-            // `80.9`
-            if(ptr2[0] != '=')
-                return -1;
+        // `80.9`
+        if(ptr[0] != '=') 
+            goto error;
+        ++ptr;
+        ptr2 = skip_whites(ptr);
+        if(ptr2[0] == '"') {
+            // create a str variable with [name] and [ptr2]
             ++ptr2;
-            ptr3 = skip_whites(ptr2);
 
-            // create a variable with [name] and [value]
-            double value = atof(ptr3);
+            ptr = strchr(ptr2, '"');
+            if(!ptr)
+                goto error;
+            *ptr = 0;
+
+            add_var(&var_head, name, NULL, ptr2);
+
+            *ptr = '"';
+
+            ret = 0;
+        }
+        else {
+            // create a num variable with [name] and [value]
+            double value = atof(ptr2);
             add_var(&var_head, name, &value, NULL);
+
+            ret = 0;
         }
-        if(!strncmp(ptr2, "str", 3)) {
-            // ` variable = "80.9"`
-            ptr2 += 3;
 
-            // `variable = "80.9"`
-            ptr2 = skip_whites(ptr2);
-            if(!ptr2)
-                return -1;
+        error:
 
-            // `= "80.9"`
-            char name[32];
-            char *ptr3 = skip_full(ptr2);
-            if(!ptr3)
-                return -1;
-            char cache = *ptr3;
-            *ptr3 = 0;
-            strncpy(name, ptr2, 32);
-            *ptr3 = cache;
-            ptr2 = skip_whites(ptr3);
+        *ptr2 = cache;
 
-            // `"80.9"`
-            if(ptr2[0] != '=')
-                return -1;
-            ++ptr2;
-            ptr3 = skip_whites(ptr2);
-
-            // create a variable with [name] and [value]
-            if(*ptr3 != '"')
-                return -1;
-            ++ptr3;
-
-            ptr2 = strchr(ptr3, '"');
-            if(!ptr2)
-                return -1;
-            *ptr2 = 0;
-            
-            add_var(&var_head, name, NULL, ptr3);
-
-            *ptr2 = '"';
-        }
+        return ret;
     }
 
     return ret;

@@ -36,7 +36,7 @@ int fn_print(char *str) {
                 ++second_arg;
                 newline = atoi(second_arg);
             }
-        
+
         // newline can only be 0 or 1  
         if(newline != 0 && newline != 1) {
             *end = '"';
@@ -60,9 +60,11 @@ int fn_print(char *str) {
         start += 2;
         *end = 0;
         
+        int ret = -1;
+
         Variable *var = find_var(&var_head, start);
         if(var == NULL) 
-            return -1;
+            goto error;
         
         int newline = 1;
 
@@ -76,18 +78,23 @@ int fn_print(char *str) {
 
         // newline can only be 0 or 1  
         if(newline != 0 && newline != 1) {
-            *end = '}';
-            return -1;
+            goto error;
         }
 
-        if(var->number)
+        if(var->number) {
             printf("%f%s", *(var->number), newline ? "\n" : "");
-        else if(var->string)
+            ret = 0;
+        }
+        else if(var->string) {
             printf("%s%s", var->string, newline ? "\n" : "");
+            ret = 0;
+        }
+
+        error:
 
         *end = '}';
 
-        return 0;
+        return ret;
 
     }
 

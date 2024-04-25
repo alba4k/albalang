@@ -1,3 +1,3 @@
-var num a = 0;
+var a = 0;
 
 print(${a});
