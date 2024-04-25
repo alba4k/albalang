@@ -32,3 +32,18 @@ Inoltre ora è possibile stampare il contenuto di una variabile con
 print(${abc});
 ```
 Tutti i valori salvati sono però costanti e non possono essere aggiornati, né è possibile utilizzare dell'aritmetica.
+
+# 25.04.2024
+- Implementati dei log extra per debug quando si compila con `make DEBUG=1`
+- Uniti gli struct Number e String in un unico Variable, definito come 
+```C
+struct Variable {
+    char *name;
+
+    double *number;
+    char *string;
+
+    struct Variable *prev;
+    struct Variable *next;
+};
+```

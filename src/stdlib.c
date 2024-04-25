@@ -6,8 +6,16 @@
 #include "utils.h"
 #include "variables.h"
 
+#ifdef DEBUG
+#include "debug.h"
+#endif // DEBUG
+
 // print some text or a variable
 int fn_print(char *str) {
+    #ifdef DEBUG
+    debug_log("Called print with args `%s`", str);
+    #endif // DEBUG
+    
     char *start = skip_whites(str);
     
     if(start[0] == '"') {
@@ -59,7 +67,7 @@ int fn_print(char *str) {
         int newline = 1;
 
         // newline ?
-        char *second_arg = skip_whites(end);
+        char *second_arg = skip_whites(end+1);
         if(second_arg)
             if(second_arg[0] == ',') {
                 ++second_arg;
@@ -88,6 +96,10 @@ int fn_print(char *str) {
 
 // delete a variable from memory
 int fn_delete(char *name) {
+    #ifdef DEBUG
+    debug_log("Called delete with args `%s`", name);
+    #endif // DEBUG
+
     name = skip_whites(name);
     if(!name)
         return -1;
@@ -98,7 +110,11 @@ int fn_delete(char *name) {
     char cache = *end;
     *end = 0;
 
-    return del_var(find_var(&var_head, name));
+    int ret = del_var(find_var(&var_head, name));
+
+    *end = cache;
+
+    return ret;
 }
 
 const struct function functions[2] = {

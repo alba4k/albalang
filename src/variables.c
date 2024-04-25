@@ -11,12 +11,19 @@ Variable var_head = {
     NULL,
 };
 
+#ifdef DEBUG
+#include "debug.h"
+#endif // DEBUG
 
 Variable *add_var(Variable *head, char *name, double *num, char *str) {
     // reach the end of the linked list
     Variable *last = head;
 
     Variable *new = malloc(sizeof(Variable));
+
+    #ifdef DEBUG
+    debug_log("Creating variable %s (at %p, with value %f or %s)", name, new, num ? *num : -1, str);
+    #endif // DEBUG
 
     new->name = malloc(sizeof(name)+1);
     strcpy(new->name, name);
@@ -44,6 +51,10 @@ Variable *add_var(Variable *head, char *name, double *num, char *str) {
 }
 
 Variable *edit_var(Variable *var, char *str, double *num) {
+    #ifdef DEBUG
+    debug_log("Changing variable %s (at %p, %f -> %f or %s -> %s)", var->name, var, var->number ? *(var->number) : -1, num ? *num : -1, var->string, str);
+    #endif // DEBUG
+
     if(num != NULL) {
         var->string = realloc(var->string, strlen(str)+1);
         strcpy(var->string, str);
@@ -58,6 +69,10 @@ Variable *edit_var(Variable *var, char *str, double *num) {
 int del_var(Variable *var) {
     if(var == NULL)
         return -1;
+
+    #ifdef DEBUG
+    debug_log("Deleting variable %s (at %p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
+    #endif // DEBUG
 
     var->prev->next = var->next;
     if(var->next != NULL)

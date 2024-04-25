@@ -6,7 +6,13 @@
 #include "utils.h"
 #include "variables.h"
 
+#ifdef DEBUG
+#include "debug.h"
+#endif // DEBUG
+
 void error(const char *message, const char *extra, const int code, void *memory) {
+    fflush(stdout);
+
     fprintf(stderr, "[\e[1m\e[31mERROR\e[37m\e[0m]: %s\n", message);
     if(extra)
         fprintf(stderr, "         \e[31m>>>\e[0m %s \e[31m<<<\e[0m\n", extra);
@@ -20,6 +26,12 @@ void error(const char *message, const char *extra, const int code, void *memory)
 }
 
 void uncomment(char *text) {
+    /*
+    #ifdef DEBUG
+    debug_log("Removing comments...");
+    #endif // DEBUG
+    */
+
     char *ptr = text;
     while((ptr = strchr(ptr, '#'))) {
         if(ptr > text) {
@@ -72,11 +84,15 @@ char *skip_full(char *ptr) {
 }
 
 int eval(const char *code) {
+    #ifdef DEBUG
+    debug_log("Running a new line");
+    #endif // DEBUG
+
     char *ptr;
     int ret = 0;
 
     // functions belonging to stdlib
-    for(int i = 0; i < sizeof(functions)/sizeof(functions[0]); i++) {
+    for(size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); i++) {
         if((ptr = strstr(code, functions[i].name))) {
             ptr += strlen(functions[i].name);
 
