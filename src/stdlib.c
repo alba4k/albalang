@@ -52,15 +52,9 @@ int fn_print(char *str) {
         start += 2;
         *end = 0;
         
-        Number *nvar = find_num(&num_head, start);
-        String *svar;
-        if(!nvar) {
-            svar = find_str(&str_head, start);
-            if(!svar) {
-                *end = '}';
-                return -1;
-            }
-        }
+        Variable *var = find_var(&var_head, start);
+        if(var == NULL) 
+            return -1;
         
         int newline = 1;
 
@@ -78,10 +72,10 @@ int fn_print(char *str) {
             return -1;
         }
 
-        if(nvar)
-            printf("%f%s", nvar->value, newline ? "\n" : "");
-        else
-            printf("%s%s", svar->value, newline ? "\n" : "");
+        if(var->number)
+            printf("%f%s", *(var->number), newline ? "\n" : "");
+        else if(var->string)
+            printf("%s%s", var->string, newline ? "\n" : "");
 
         *end = '}';
 
@@ -104,20 +98,7 @@ int fn_delete(char *name) {
     char cache = *end;
     *end = 0;
 
-    Number *nvar = find_num(&num_head, name);
-    String *svar = NULL;
-    if(!nvar)
-        svar = find_str(&str_head, name);
-
-    if(!svar)
-        return -1;
-    
-    if(nvar)
-        del_num(nvar);
-    else
-        del_str(svar);
-
-    return 0;
+    return del_var(find_var(&var_head, name));
 }
 
 const struct function functions[2] = {

@@ -53,20 +53,10 @@ int main(int argc, char **argv) {
         line = endline;
     }
 
-    // clear linked lists
-    Number *n_current = num_head.next;
-    while(n_current != NULL) {
-        Number *next = n_current->next;
-        free(n_current);
-        n_current = next;
-    }
-    String *s_current = str_head.next;
-    while(s_current != NULL) {
-        String *next = s_current->next;
-        free(s_current->value);
-        free(s_current);
-        s_current = next;
-    }
+    // clear variable linked list
+    while(var_head.next != NULL)
+        del_var(var_head.next);
+
     free(code);
 
     return 0;

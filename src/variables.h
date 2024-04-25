@@ -1,43 +1,27 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
-struct Number {
-    char name[32];
-    double value;
+struct Variable {
+    char *name;
 
-    struct Number *next;
-    struct Number *prev;
+    double *number;
+    char *string;
+
+    struct Variable *prev;
+    struct Variable *next;
 };
 
-struct String {
-    char name[32];
-    char *value;
-
-    struct String *next;
-    struct String *prev;
-};
-
-typedef struct Number Number;
-typedef struct String String;
+typedef struct Variable Variable;
 
 // heads of the linked lists, defined in variables.c
-extern struct Number num_head;
-extern struct String str_head;
+extern Variable var_head;
 
-Number *add_num(struct Number *head, char *name, double value);
+Variable *add_var(struct Variable *head, char *name, double *num, char *str);
 
-String *add_str(struct String *head, char *name, char *value);
+Variable *edit_var(Variable *var, char *str, double *num);
 
-Number *edit_num(struct Number *var, double value);
+int del_var(struct Variable *var);
 
-String *edit_str(String *var, char *value);
-
-Number *del_num(struct Number *var);
-
-String *del_str(struct String *var);
-
-Number *find_num(Number *head, char *name);
-
-String *find_str(String *head, char *name);
+Variable *find_var(Variable *head, char *name);
 
 #endif // VARIABLES_H

@@ -3,56 +3,38 @@
 
 #include "variables.h"
 
-Number num_head = {
+Variable var_head = {
     "",
-    0,
     NULL,
-    NULL,
-};
-String str_head = {
-    "",
     NULL,
     NULL,
     NULL,
 };
 
-Number *add_num(Number *head, char *name, double value) {
+
+Variable *add_var(Variable *head, char *name, double *num, char *str) {
     // reach the end of the linked list
-    Number *last = head;
+    Variable *last = head;
 
-    while(last->next != NULL)
-        last = last->next;
+    Variable *new = malloc(sizeof(Variable));
 
-    Number *new = malloc(sizeof(Number));
+    new->name = malloc(sizeof(name)+1);
+    strcpy(new->name, name);
 
-    strncpy(new->name, name, sizeof(new->name));
-    new->value = value;
+    new->number = NULL;
+    new->string = NULL;
 
-    new->next = NULL;
-    if(last) {
-        new->prev = last;
-        last->next = new;
+    if(str != NULL) {
+        new->string = malloc(strlen(str)+1);
+        strcpy(new->string, str);
     }
-    else
-        new->prev = NULL;
-
-    return new;
-}
-
-String *add_str(String *head, char *name, char *value) {
-    // reach the end of the linked list
-    String *last = head;
+    else if(num != NULL) {
+        new->number = malloc(sizeof(double));
+        *(new->number) = *num;
+    }
 
     while(last->next != NULL)
         last = last->next;
-            
-    String *new = malloc(sizeof(String));
-
-    strncpy(new->name, name, sizeof(new->name));
-
-    size_t len = strlen(value);
-    new->value = malloc(len+1);
-    strcpy(new->value, value);
 
     new->next = NULL;
     new->prev = last;
@@ -61,53 +43,36 @@ String *add_str(String *head, char *name, char *value) {
     return new;
 }
 
-Number *edit_num(Number *var, double value) {
-    var->value = value;
-
-    return var;
-}
-
-String *edit_str(String *var, char *value) {
-    size_t len = strlen(value);
-    var->value = realloc(var->value, len+1);
-    strcpy(var->value, value);
-
-    return var;
-}
-
-Number *del_num(Number *var) {
-    Number *prev = var->prev;
-
-    // var->prev->next = var->next;
-    var->next = var->next;
-
-    free(var);
-    
-    return 0;
-}
-
-String *del_str(String *var) {
-    String *prev = var->prev;
-
-    prev->next = var->next;
-
-    free(var->value);
-    free(var);
-
-    return 0;
-}
-
-Number *find_num(Number *head, char *name) {
-    for(Number *current = head->next; current != NULL; current = current->next) {
-        if(strcmp(current->name, name) == 0)
-            return current;
+Variable *edit_var(Variable *var, char *str, double *num) {
+    if(num != NULL) {
+        var->string = realloc(var->string, strlen(str)+1);
+        strcpy(var->string, str);
+    }
+    else if(num != NULL) {
+        *(var->number) = *(num);
     }
 
-    return NULL;
+    return var;
 }
 
-String *find_str(String *head, char *name) {
-    for(String *current = head->next; current != NULL; current = current->next) {
+int del_var(Variable *var) {
+    if(var == NULL)
+        return -1;
+
+    var->prev->next = var->next;
+    if(var->next != NULL)
+        var->next->prev = var->prev;
+
+    free(var->name);
+    free(var->number);
+    free(var->string);
+    free(var);
+
+    return 0;
+}
+
+Variable *find_var(Variable *head, char *name) {
+    for(Variable *current = head->next; current != NULL; current = current->next) {
         if(strcmp(current->name, name) == 0)
             return current;
     }

@@ -11,20 +11,9 @@ void error(const char *message, const char *extra, const int code, void *memory)
     if(extra)
         fprintf(stderr, "         \e[31m>>>\e[0m %s \e[31m<<<\e[0m\n", extra);
 
-    // clear linked lists
-    Number *n_current = num_head.next;
-    while(n_current != NULL) {
-        Number *next = n_current->next;
-        free(n_current);
-        n_current = next;
-    }
-    String *s_current = str_head.next;
-    while(s_current != NULL) {
-        String *next = s_current->next;
-        free(s_current->value);
-        free(s_current);
-        s_current = next;
-    }
+    // clear variable linked list
+    while(var_head.next != NULL)
+        del_var(var_head.next);
 
     free(memory);
     exit(code);
@@ -108,23 +97,23 @@ int eval(const char *code) {
         }
     }
 
-    // we have something like `  var num variable <- "80.9"  `
+    // we have something like `  var num variable = 80.9  `
     if((ptr = strstr(code, "var"))) {
-        // `num variable <- "80.9"`
+        // `num variable = 80.9`
         char *ptr2 = skip_whites(ptr+3);
         if(!ptr2)
             return -1;
         
         if(!strncmp(ptr2, "num", 3)) {
-            // ` variable <- "80.9"`
+            // ` variable = 80.9`
             ptr2 += 3;
 
-            // `variable <- "80.9"`
+            // `variable = 80.9`
             ptr2 = skip_whites(ptr2);
             if(!ptr2)
                 return -1;
 
-            // `<- "80.9"`
+            // `= 80.9`
             char name[32];
             char *ptr3 = skip_full(ptr2);
             if(!ptr3)
@@ -135,27 +124,26 @@ int eval(const char *code) {
             *ptr3 = cache;
             ptr2 = skip_whites(ptr3);
 
-            // `"80.9"`
+            // `80.9`
             if(ptr2[0] != '=')
                 return -1;
             ++ptr2;
             ptr3 = skip_whites(ptr2);
 
             // create a variable with [name] and [value]
-            Number *new = add_num(&num_head, name, atof(ptr3));
-            
-            *ptr2 = '"';
+            double value = atof(ptr3);
+            add_var(&var_head, name, &value, NULL);
         }
         if(!strncmp(ptr2, "str", 3)) {
-            // ` variable <- "80.9"`
+            // ` variable = "80.9"`
             ptr2 += 3;
 
-            // `variable <- "80.9"`
+            // `variable = "80.9"`
             ptr2 = skip_whites(ptr2);
             if(!ptr2)
                 return -1;
 
-            // `<- "80.9"`
+            // `= "80.9"`
             char name[32];
             char *ptr3 = skip_full(ptr2);
             if(!ptr3)
@@ -182,7 +170,7 @@ int eval(const char *code) {
                 return -1;
             *ptr2 = 0;
             
-            String *new = add_str(&str_head, name, ptr3);
+            add_var(&var_head, name, NULL, ptr3);
 
             *ptr2 = '"';
         }
