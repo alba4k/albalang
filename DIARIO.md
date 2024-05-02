@@ -52,3 +52,35 @@ struct Variable {
 var abc = "ciao";
 var 123 = 1.23;
 ```
+
+# 02.05.2024
+- Creata una serie di operazioni che possono essere effettuate su di una variabile numerica
+```albalang
+var a = 2;           # 2
+var b = 1;
+
+add(a, ${b});        # 3
+divide(a, 1.5);      # 2
+multiply(a, 2);      # 4
+power(a, 3);         # 64
+sqrt(a);             # 8
+subtract(a, 5);      # 3
+
+print(${a});         # >>> 3
+```
+- Un operatore permette di concatenare delle stringhe
+```albalang
+var a = "hello";
+var b = " world";
+
+concatenate(a, ${b});
+print(${a});         # >>> hello world
+```
+- È ora possibile cambiare il valore di una variabile
+```albalang
+var a = 3;
+print(${a});         # >>> 3
+
+var b = "ciao";
+print(${a});         # >>> ciao
+```

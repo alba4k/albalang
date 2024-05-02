@@ -10,6 +10,6 @@ void error(const char *message, const char *extra, const int code, void *memory)
 
 void uncomment(char *text);
 
-int eval(char *code);
+int run_line(char *code);
 
 #endif // UTILS_H

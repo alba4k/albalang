@@ -26,11 +26,9 @@ void error(const char *message, const char *extra, const int code, void *memory)
 }
 
 void uncomment(char *text) {
-    /*
     #ifdef DEBUG
     debug_log("Removing comments...");
     #endif // DEBUG
-    */
 
     char *ptr = text;
     while((ptr = strchr(ptr, '#'))) {
@@ -54,9 +52,9 @@ void uncomment(char *text) {
 }
 
 char *skip_whites(char *ptr) {
-    if(!ptr)
+    if(ptr == NULL)
         return NULL;
-    if(!ptr[0])
+    if(ptr[0] == 0)
         return NULL;
 
     while(*ptr) {
@@ -69,9 +67,9 @@ char *skip_whites(char *ptr) {
 }
 
 char *skip_full(char *ptr) {
-    if(!ptr)
+    if(ptr == NULL)
         return NULL;
-    if(!ptr[0])
+    if(ptr[0] == 0)
         return NULL;
 
     while(*ptr) {
@@ -83,7 +81,7 @@ char *skip_full(char *ptr) {
     return NULL;
 }
 
-int eval(char *code) {
+int run_line(char *code) {
     #ifdef DEBUG
     debug_log("Running a new line");
     #endif // DEBUG
@@ -97,7 +95,7 @@ int eval(char *code) {
     for(size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); i++) {
         if((ptr = strstr(code, functions[i].name))) {
             ptr += strlen(functions[i].name);
-
+            
             char *args = skip_whites(ptr);
             if(args[0] != '(')
                 return -1;
@@ -149,7 +147,11 @@ int eval(char *code) {
                 goto error;
             *ptr = 0;
 
-            add_var(&var_head, name, NULL, ptr2);
+            Variable *var = find_var(&var_head, name);
+            if(var == NULL)
+                add_var(&var_head, name, NULL, ptr2);
+            else
+                edit_var(var, NULL, ptr2);
 
             *ptr = '"';
 
@@ -158,7 +160,11 @@ int eval(char *code) {
         else {
             // create a num variable with [name] and [value]
             double value = atof(ptr2);
-            add_var(&var_head, name, &value, NULL);
+            Variable *var = find_var(&var_head, name);
+            if(var == NULL)
+                add_var(&var_head, name, &value, NULL);
+            else
+                edit_var(var, &value, NULL);
 
             ret = 0;
         }

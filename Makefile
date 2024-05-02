@@ -10,7 +10,7 @@ ifeq ($(DEBUG),1)
 endif
 
 build/albalang: $(OBJ)
-	$(CC) $(CFLAGS) $(OBJ) -o build/albalang
+	$(CC) $(CFLAGS) $(OBJ) -o build/albalang -lm
 
 obj/debug.o: src/debug.c
 	$(CC) $(CFLAGS) -c src/debug.c -o obj/debug.o

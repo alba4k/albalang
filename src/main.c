@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     while((endline = strchr(endline, ';')) != NULL) {
         *endline = 0;
 
-        if(eval(line) != 0) {
+        if(run_line(line) != 0) {
             *endline = ';';
 
             // line formatting

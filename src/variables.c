@@ -22,7 +22,10 @@ Variable *add_var(Variable *head, char *name, double *num, char *str) {
     Variable *new = malloc(sizeof(Variable));
 
     #ifdef DEBUG
-    debug_log("Creating variable %s (%p, value: %f or %s)", name, new, num ? *num : 0, str);
+    if(num != NULL)
+        debug_log("Creating variable %s (%p, num: %f)", name, new, *num);
+    else
+        debug_log("Creating variable %s (%p, str: %s)", name, new, str);
     #endif // DEBUG
 
     new->name = malloc(sizeof(name)+1);
@@ -50,17 +53,26 @@ Variable *add_var(Variable *head, char *name, double *num, char *str) {
     return new;
 }
 
-Variable *edit_var(Variable *var, char *str, double *num) {
+Variable *edit_var(Variable *var, double *num, char *str) {
     #ifdef DEBUG
     debug_log("Changing variable %s (%p, %f -> %f or %s -> %s)", var->name, var, var->number ? *(var->number) : 0, num ? *num : 0, var->string, str);
     #endif // DEBUG
 
-    if(num != NULL) {
+    if(var == NULL)
+        return NULL;
+
+    if(str != NULL) {
         var->string = realloc(var->string, strlen(str)+1);
         strcpy(var->string, str);
+
+        free(var->number);
+        var->number = NULL;
     }
     else if(num != NULL) {
         *(var->number) = *(num);
+
+        free(var->string);
+        var->string = NULL;
     }
 
     return var;
@@ -93,4 +105,26 @@ Variable *find_var(Variable *head, char *name) {
     }
 
     return NULL;
+}
+
+Variable *access_var(char *str) {
+    if(str == NULL)
+        return NULL;
+    if(str[0] != '$')
+        return NULL;
+    if(str[1] != '{')
+        return NULL;
+        
+    char *name = str+2;
+
+    char *end = strchr(name, '}');
+    if(end == NULL)
+        return NULL;
+    *end = 0;
+    
+    Variable *var = find_var(&var_head, name);
+
+    *end = '}';
+
+    return var;
 }

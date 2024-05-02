@@ -18,10 +18,12 @@ extern Variable var_head;
 
 Variable *add_var(struct Variable *head, char *name, double *num, char *str);
 
-Variable *edit_var(Variable *var, char *str, double *num);
+Variable *edit_var(Variable *var, double *num, char *str);
 
 int del_var(struct Variable *var);
 
 Variable *find_var(Variable *head, char *name);
+
+Variable *access_var(char *str);
 
 #endif // VARIABLES_H
