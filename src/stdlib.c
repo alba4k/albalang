@@ -33,39 +33,32 @@ int combine(char *str, const int mode) {
     if(end == NULL) 
         return -1;
 
-    double value = 0;
+    Variable *var2 = eval(end);
+    if(var2->number == NULL)
+        goto error;
 
-    if(end[0] == '$') {
-        Variable *var2 = access_var(end);
-
-        if(var2 == NULL)
-            goto error;
-        if(var2->string != NULL)
-            goto error;
-        
-        value = *(var2->number);
-    }
-    else
-        value = atof(end);
+    double value = *var2->number;
+    
+    del_var(var2);
 
     switch(mode) {
-    case 0: // add
-        value = *(var1->number) + value;
-        break;
-    case 1: // subtract
-        value = *(var1->number) - value;
-        break;
-    case 2: // multiply
-        value = *(var1->number) * value;
-        break;
-    case 3: // divide
-        value = *(var1->number) / value;
-        break;
-    case 4: // power
-        value = pow(*(var1->number), value);
-        break;
-    default:
-        goto error;
+        case 0: // add
+            value = *(var1->number) + value;
+            break;
+        case 1: // subtract
+            value = *(var1->number) - value;
+            break;
+        case 2: // multiply
+            value = *(var1->number) * value;
+            break;
+        case 3: // divide
+            value = *(var1->number) / value;
+            break;
+        case 4: // power
+            value = pow(*(var1->number), value);
+            break;
+        default:
+            goto error;
     }
 
     edit_var(var1, &value, NULL);
@@ -114,33 +107,20 @@ int fn_concatenate(char *str) {
     if(end == NULL) 
         return -1;
 
-    char *string = 0;
+    Variable *var2 = eval(end);
+    if(var2->string == NULL)
+        goto error;
 
-    if(end[0] == '$') {
-        Variable *var2 = access_var(end);
+    char *string = var2->string;
 
-        if(var2 == NULL)
-            goto error;
-        if(var2->number != NULL)
-            goto error;
-        
-        string = var2->string;
-    }
-    else if(end[0] == '"') {
-        string = end+1;
-
-        end = strchr(string, '"');
-        if(end == NULL)
-            goto error;
-    }
-
-    char *buf = malloc(strlen(var1->string) + (end - string) + 1);
+    char *buf = malloc(strlen(var1->string) + strlen(var2->string) + 1);
 
     strcpy(buf, var1->string);
-    strncat(buf, string, end-string);
+    strcat(buf, string);
 
     edit_var(var1, NULL, buf);
 
+    del_var(var2);
     free(buf);
 
     *cache = ',';
@@ -208,67 +188,52 @@ int fn_print(char *str) {
     debug_log("Called print with args `%s`", str);
     #endif // DEBUG
     
-    char *start = skip_whites(str);
+    str = skip_whites(str);
+
+    // using numbers might give weirds results in case of something like `print(4.3, 0);`
+    Variable *var = eval(str);
+
+    int newline = 1;
+    int ret = 0;
+
+    char *end;
+    if(var->name)
+        end = str + strlen(var->name) + 3;
+    else if(var->string)
+        end = str + strlen(var->string) + 2;
+    else {
+        ret = -1;
+        goto end;
+    }
     
-    if(start[0] == '"') {
-        ++start;
-        char *end = strchr(start, '"');
-
-        if(!end)
-            return -1;
-            
-        *end = 0;
-
-        int newline = 1;
-
-        // newline ?
-        char *second_arg = skip_whites(end+1);
-        if(second_arg != NULL)
-            if(second_arg[0] == ',') {
-                ++second_arg;
-                newline = atoi(second_arg);
-            }
-
-        // newline can only be 0 or 1  
-        if(newline != 0 && newline != 1) {
-            *end = '"';
-            return -1;
+    // newline ?
+    char *second_arg = skip_whites(end);
+    if(second_arg != NULL)
+        if(second_arg[0] == ',') {
+            ++second_arg;
+            newline = atoi(second_arg);
         }
 
-        printf("%s%s", start, newline ? "\n" : "");
-
-        *end = '"';
-
-        return 0;
-    }
-    else if(start[0] == '$') {
-        Variable *var = access_var(start);
-        if(var == NULL) 
-            return -1;
-        
-        int newline = 1;
-
-        // newline ?
-        char *second_arg = skip_whites(start + 3 + strlen(var->name));
-        if(second_arg)
-            if(second_arg[0] == ',') {
-                ++second_arg;
-                newline = atoi(second_arg);
-            }
-
-        // newline can only be 0 or 1  
-        if(newline != 0 && newline != 1)
-            return -1;
-
-        if(var->number)
-            printf("%f%s", *(var->number), newline ? "\n" : "");
-        else if(var->string)
-            printf("%s%s", var->string, newline ? "\n" : "");
-
-        return 0;
+    // newline can only be 0 or 1  
+    if(newline != 0 && newline != 1) {
+        ret = -1;
+        goto end;
     }
 
-    return -1;
+    #ifdef DEBUG
+    printf("[\e[1m\e[32mPRINT\e[37m\e[0m]: ");
+    #endif // DEBUG
+
+    if(var->number)
+        printf("%f%s", *(var->number), newline ? "\n" : "");
+    else if(var->string)
+        printf("%s%s", var->string, newline ? "\n" : "");
+
+    end:
+
+    del_var(var);
+
+    return ret;
 }
 
 // take the square root of the variable

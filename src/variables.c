@@ -86,7 +86,9 @@ int del_var(Variable *var) {
     debug_log("Deleting variable %s (%p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
     #endif // DEBUG
 
-    var->prev->next = var->next;
+
+    if(var->prev != NULL)
+        var->prev->next = var->next;
     if(var->next != NULL)
         var->next->prev = var->prev;
 

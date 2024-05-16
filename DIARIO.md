@@ -81,6 +81,9 @@ print(${a});         # >>> hello world
 var a = 3;
 print(${a});         # >>> 3
 
-var b = "ciao";
+var b = "ciao";(
 print(${a});         # >>> ciao
 ```
+
+# 16.05.2024
+Ora dove si può accedere ad una variabile con `${var}` è accettata anche un numero o una stringa grazie all'implementazione di eval() che gestisce i valori inseriti. Questa unifica l'implementazione del parsing per variabili, numeri e stringhe.
