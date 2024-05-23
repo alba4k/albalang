@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "error.h"
 #include "stdlib.h"
 #include "utils.h"
 #include "variables.h"
@@ -17,25 +18,34 @@ int combine(char *str, const int mode) {
     char *end = strchr(var1_name, ',');
 
     if(end == NULL)
-        return -1;
+        return ERR_SYNTAX;
 
     *end = 0;
     char *cache = end;
 
     Variable *var1 = find_var(&var_head, var1_name);
 
-    if(var1 == NULL)
-        goto error;
-    if(var1->string != NULL)
-        goto error;
+    if(var1 == NULL) {
+        *(cache) = ',';
+        
+        return ERR_VAR_NOT_FOUND;
+    }
+    if(var1->string != NULL) {
+        *(cache) = ',';
+        return ERR_WRONG_TYPE;
+    }
     
     end = skip_whites(end+1);
-    if(end == NULL) 
-        return -1;
-
+    if(end == NULL) {
+        *(cache) = ',';
+        return ERR_SYNTAX;
+    }
+    
     Variable *var2 = eval(end);
-    if(var2->number == NULL)
-        goto error;
+    if(var2->number == NULL) {
+        *(cache) = ',';
+        return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
+    }
 
     double value = *var2->number;
     
@@ -58,18 +68,14 @@ int combine(char *str, const int mode) {
             value = pow(*(var1->number), value);
             break;
         default:
-            goto error;
+            *(cache) = ',';
+            return ERR_SYNTAX;
     }
 
     edit_var(var1, &value, NULL);
 
     *cache = ',';
     return 0;
-
-    error:
-
-    *(cache) = ',';
-    return -1;
 }
 
 // add the contents of var2/end to var1
@@ -91,25 +97,31 @@ int fn_concatenate(char *str) {
     char *end = strchr(var1_name, ',');
 
     if(end == NULL)
-        return -1;
+        return ERR_SYNTAX;
 
     *end = 0;
     char *cache = end;
 
     Variable *var1 = find_var(&var_head, var1_name);
 
-    if(var1 == NULL)
-        goto error;
-    if(var1->number != NULL)
-        goto error;
+    if(var1 == NULL) {
+        *(cache) = ',';
+        return ERR_VAR_NOT_FOUND;
+    }
+    if(var1->number != NULL) {
+        *(cache) = ',';
+        return ERR_WRONG_TYPE;
+    }
     
     end = skip_whites(end+1);
     if(end == NULL) 
-        return -1;
+        return ERR_SYNTAX;
 
     Variable *var2 = eval(end);
-    if(var2->string == NULL)
-        goto error;
+    if(var2->string == NULL) {
+        *(cache) = ',';
+        return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
+    }
 
     char *string = var2->string;
 
@@ -125,11 +137,6 @@ int fn_concatenate(char *str) {
 
     *cache = ',';
     return 0;
-
-    error:
-
-    *(cache) = ',';
-    return -1;
 }
 
 // delete a variable from memory
@@ -140,7 +147,7 @@ int fn_delete(char *name) {
 
     name = skip_whites(name);
     if(!name)
-        return -1;
+        return ERR_SYNTAX;
 
     char *end = skip_full(name);
     if(!end)
@@ -152,7 +159,10 @@ int fn_delete(char *name) {
 
     *end = cache;
 
-    return ret;
+    if(ret == -1)
+        return ERR_VAR_NOT_FOUND;
+
+    return 0;
 }
 
 // divide the contents of var2/end by var1
@@ -202,8 +212,8 @@ int fn_print(char *str) {
     else if(var->string)
         end = str + strlen(var->string) + 2;
     else {
-        ret = -1;
-        goto end;
+        del_var(var);
+        return ERR_GENERIC;
     }
     
     // newline ?
@@ -216,20 +226,18 @@ int fn_print(char *str) {
 
     // newline can only be 0 or 1  
     if(newline != 0 && newline != 1) {
-        ret = -1;
-        goto end;
+        del_var(var);
+        return ERR_GENERIC;
     }
 
     #ifdef DEBUG
-    printf("[\e[1m\e[32mPRINT\e[37m\e[0m]: ");
+    printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
     #endif // DEBUG
 
     if(var->number)
         printf("%f%s", *(var->number), newline ? "\n" : "");
     else if(var->string)
         printf("%s%s", var->string, newline ? "\n" : "");
-
-    end:
 
     del_var(var);
 
@@ -257,9 +265,9 @@ int fn_sqrt(char *str) {
         *end = cache;
 
     if(var == NULL)
-        return -1;
+        return ERR_VAR_NOT_FOUND;
     if(var->string != NULL)
-        return -1;
+        return ERR_WRONG_TYPE;
     
     double value = sqrt(*(var->number));
     edit_var(var, &value, NULL);

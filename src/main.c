@@ -3,21 +3,22 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "error.h"
 #include "utils.h"
 #include "variables.h"
 
 int main(int argc, char **argv) {
     // guards against incorrect usage
-    if(argc < 2)
-        error("Usage: albalang <file>.al.", NULL, 1, NULL);
+    if(argc != 2)
+        error("Usage: albalang <file>.al.", NULL, ERR_BAD_USAGE, NULL);
 
     if(access(argv[1], F_OK))
-        error("This file does not exist:", argv[1], 2, NULL);
+        error("This file does not exist:", argv[1], ERR_NO_SUCH_FILE, NULL);
 
     // open the file
     FILE *fp = fopen(argv[1], "r");
     if(!fp)
-        error("The file could not be opened.", argv[1], 3, NULL);
+        error("The file could not be opened.", argv[1], ERR_FILE_UNREADABLE, NULL);
 
     // get the size of the file
     fseek(fp, 0, SEEK_END);
@@ -35,8 +36,8 @@ int main(int argc, char **argv) {
     char *line = code;
     while((endline = strchr(endline, ';')) != NULL) {
         *endline = 0;
-
-        if(run_line(line) != 0) {
+        int ret = run_line(line);
+        if(ret != 0) {
             *endline = ';';
 
             // line formatting
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
             if((ptr = strchr(line, ';')))
                 ptr[1] = 0;
 
-            error("And error occurred while running the following line:", skip_whites(line), -1, code);
+            error("An error occurred while running the following line", skip_whites(line), ret, code);
         }
 
         *endline = ';';

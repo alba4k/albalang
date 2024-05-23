@@ -8,8 +8,6 @@ char *skip_full(char *ptr);
 
 Variable *eval(char *expression);
 
-void error(const char *message, const char *extra, const int code, void *memory);
-
 void uncomment(char *text);
 
 int run_line(char *code);

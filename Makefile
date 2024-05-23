@@ -1,10 +1,10 @@
 CC := clang
 CFLAGS := -Wall -Wextra -O2
 
-OBJ := obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
+OBJ := obj/error.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
 
 ifeq ($(DEBUG),1)
-	OBJ := obj/debug.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
+	OBJ := obj/debug.o obj/error.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
 	CLEAN := clean
 	CFLAGS := -Wall -Wextra -O2 -DDEBUG
 endif
@@ -14,6 +14,9 @@ build/albalang: $(OBJ)
 
 obj/debug.o: src/debug.c
 	$(CC) $(CFLAGS) -c src/debug.c -o obj/debug.o
+
+obj/error.o: src/error.c
+	$(CC) $(CFLAGS) -c src/error.c -o obj/error.o
 
 obj/main.o: src/main.c
 	$(CC) $(CFLAGS) -c src/main.c -o obj/main.o

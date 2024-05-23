@@ -7,7 +7,7 @@ void debug_log(const char *format, ...) {
 
     fflush(stdout);
 
-    fprintf(stderr, "[\e[1m\e[33mLOG\e[37m\e[0m]: ");
+    fprintf(stderr, "[\e[1m\e[33mLOG\e[37m\e[0m]   ");
     vprintf(format, args);
     printf("\n");
 

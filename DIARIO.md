@@ -87,3 +87,11 @@ print(${a});         # >>> ciao
 
 # 16.05.2024
 Ora dove si può accedere ad una variabile con `${var}` è accettata anche un numero o una stringa grazie all'implementazione di eval() che gestisce i valori inseriti. Questa unifica l'implementazione del parsing per variabili, numeri e stringhe.
+
+# 23.05.2024
+Quando vi è un errore sarà stampato un messaggio più specifico oltre all'ultima riga eseguita
+```
+[ERROR] An error occurred while running the following line
+        >>> add(w, ${v}); <<<
+       <!> Variable not found
+```
