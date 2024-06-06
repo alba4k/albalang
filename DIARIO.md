@@ -95,3 +95,13 @@ Quando vi è un errore sarà stampato un messaggio più specifico oltre all'ulti
         >>> add(w, ${v}); <<<
        <!> Variable not found
 ```
+
+# 6.6.2024
+Non dovrebbero più esserci particolari problemi quando si cerca di usare ';' in una stringa, ad esempio
+```albalang
+print(";");
+```
+non verrà più letto come
+```albalang
+print(";
+```

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "core.h"
 #include "error.h"
 #include "utils.h"
 #include "variables.h"
@@ -35,6 +36,16 @@ int main(int argc, char **argv) {
     char *endline = code;
     char *line = code;
     while((endline = strchr(endline, ';')) != NULL) {
+        if(endline > code) {
+            // \; should not end a line
+            if(is_in_string(code, endline) == true) {
+                endline = strchr(endline+1, ';');
+
+                if(endline == NULL)
+                    break;
+            }
+        }
+        
         *endline = 0;
         int ret = run_line(line);
         if(ret != 0) {

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "core.h"
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"

@@ -6,3 +6,5 @@ print("Hey", 1);
 # print("fhdjkh", 2) ;
 
 print("\#ciao");
+
+print(";");
