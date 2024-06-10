@@ -33,37 +33,7 @@ int main(int argc, char **argv) {
 
     uncomment(code);
 
-    char *endline = code;
-    char *line = code;
-    while((endline = strchr(endline, ';')) != NULL) {
-        if(endline > code) {
-            // \; should not end a line
-            if(is_in_string(code, endline) == true) {
-                endline = strchr(endline+1, ';');
-
-                if(endline == NULL)
-                    break;
-            }
-        }
-        
-        *endline = 0;
-        int ret = run_line(line);
-        if(ret != 0) {
-            *endline = ';';
-
-            // line formatting
-            line = skip_whites(line);
-            char *ptr;
-            if((ptr = strchr(line, ';')))
-                ptr[1] = 0;
-
-            error("An error occurred while running the following line", skip_whites(line), ret, code);
-        }
-
-        *endline = ';';
-        ++endline;
-        line = endline;
-    }
+    run_code(code);
 
     // clear variable linked list
     while(var_head.next != NULL)

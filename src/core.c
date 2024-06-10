@@ -67,7 +67,133 @@ Variable *eval(char *expression) {
     return result;
 }
 
+void run_code(char *code) {
+    
+    char *endline = code;
+    char *line = code;
+
+    while((endline = strchr(line, ';')) != NULL) {
+        if(endline > code) {
+            // \; should not end a line
+            if(is_in_string(code, endline) == true) {
+                endline = strchr(endline+1, ';');
+
+                if(endline == NULL)
+                    break;
+            }
+        }
+
+        *endline = 0;
+        line = skip_whites(line);
+        if(line == NULL) {
+            *endline = ';';
+            line = endline+1;
+            continue;
+        }
+
+        if(strncmp(line, "if", 2) == 0) {
+            #ifdef DEBUG
+            debug_log("Found an if statement");
+            #endif // DEBUG
+
+            char *ptr = skip_whites(line+2);
+            char *start = ptr;
+
+            if(ptr[0] == '$')
+                start = strchr(ptr+1,'}');
+
+            start = strchr(start, '{');
+            if(start == NULL)
+                error("if always requires a starting {", NULL, ERR_SYNTAX, code);
+            start[0] = 0;
+
+            Variable *var = eval(ptr);
+
+            if(var->string != NULL)
+                error("if always requires a string", NULL, ERR_WRONG_TYPE, code);
+
+            if(var->number == NULL)
+                error("if always requires a number", NULL, ERR_GENERIC, code);
+
+            *endline = ';';
+
+            start[0] = '{';
+            ptr = find_section_end(start);
+            
+            if(ptr == NULL)
+                error("if always requires a closing }", NULL, ERR_SYNTAX, code);
+
+            if(*(var->number) != 0) {
+                ptr[0] = 0;
+                run_code(start+1);  // recursion, meh
+                ptr[0] = '}';
+                
+                ++ptr;
+                start = skip_whites(ptr);
+                
+                if(start != NULL)
+                    if(strncmp(start, "else", 4) == 0) {
+                        start = skip_whites(start+4);
+                        ptr = find_section_end(start);
+                        if(ptr == NULL)
+                            error("else also requires a starting { and a closing }", NULL, ERR_SYNTAX, code);
+                    }
+            }
+            else {
+                ++ptr;
+                start = skip_whites(ptr);
+
+                if(start == NULL)
+                    goto end;
+                if(strncmp(start, "else", 4) != 0)
+                    goto end;
+                start += 4;
+
+                #ifdef DEBUG
+                debug_log("Found an else statement");
+                #endif // DEBUG
+
+                ptr = skip_whites(start);
+
+                start = find_section_end(ptr);
+                if(start == NULL)
+                    error("else also requires a starting { and a closing }", NULL, ERR_SYNTAX, code);
+                
+                start[0] = 0;
+                run_code(ptr);  // recursion, meh
+                start[0] = '}';
+
+                ptr = start + 1;
+            }
+
+            end:
+            line = ptr;
+            del_var(var);
+            continue;
+        }
+        
+        int ret = run_line(line);
+
+        if(ret != 0) {
+            *endline = ';';
+
+            // line formatting
+            char *ptr;
+            if((ptr = strchr(line, ';')))
+                ptr[1] = 0;
+
+            error("An error occurred while running the following line", skip_whites(line), ret, code);
+        }
+
+        *endline = ';';
+        line = endline+1;
+    }
+}
+
 int run_line(char *code) {
+    if(code == NULL)
+        return 0;
+
     #ifdef DEBUG
     debug_log("Running a new line");
     #endif // DEBUG
@@ -150,30 +276,4 @@ int run_line(char *code) {
     }
 
     return ERR_SYNTAX;
-}
-
-void uncomment(char *text) {
-    #ifdef DEBUG
-    debug_log("Removing comments...");
-    #endif // DEBUG
-
-    char *ptr = text;
-    while((ptr = strchr(ptr, '#'))) {
-        if(ptr > text) {
-            if(ptr[-1] == '\\') {
-                memmove(ptr - 1, ptr, strlen(ptr)+1);
-                ++ptr;
-
-                continue;
-            }
-        }
-
-        char *ptr2 = strchr(ptr, '\n');
-        if(ptr2 != NULL)
-            memmove(ptr, ptr2 + 1, strlen(ptr2));
-        else
-            *ptr = 0;
-
-        ++ptr;
-    }
 }

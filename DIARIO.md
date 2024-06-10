@@ -105,3 +105,24 @@ non verrà più letto come
 ```albalang
 print(";
 ```
+
+# 10.6.2024
+Ho aggiunto dei rudimentali if / else (per ora è considerato true un numero diverso da 0)
+```albalang
+var a = 12;
+
+if ${a} {
+    print("1");
+}
+
+if 0 {
+    print("2");
+} else {
+    print("3");
+}
+```
+Stamperà:
+```
+1
+3
+```

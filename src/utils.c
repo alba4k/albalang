@@ -10,6 +10,30 @@
 #include "debug.h"
 #endif // DEBUG
 
+// find the closing } to a section starting with { and return the following character
+char *find_section_end(const char *start) {
+    if(start[0] != '{')
+        return NULL;
+
+    int count = 1;
+    char *ptr = (char*)start;
+
+    do {
+        ++ptr;
+
+        if(ptr[0] == '{')
+            ++count;
+        else if(ptr[0] == '}')
+            --count;
+    } while(count > 0 && ptr[0] != 0);
+
+    if(ptr[0] == 0)
+        return NULL;
+    else
+        return ptr;
+}
+
+// checks if the given character is between two " "
 bool is_in_string(const char *str, const char *place) {
     int count = 0;
 
@@ -25,6 +49,7 @@ bool is_in_string(const char *str, const char *place) {
     return false;
 }
 
+// skip every whitespace, return the first full character
 char *skip_whites(char *ptr) {
     if(ptr == NULL)
         return NULL;
@@ -40,6 +65,7 @@ char *skip_whites(char *ptr) {
     return NULL;
 }
 
+// skip every full character, return the first whitespace
 char *skip_full(char *ptr) {
     if(ptr == NULL)
         return NULL;
@@ -53,4 +79,30 @@ char *skip_full(char *ptr) {
     }
 
     return NULL;
+}
+
+void uncomment(char *text) {
+    #ifdef DEBUG
+    debug_log("Removing comments...");
+    #endif // DEBUG
+
+    char *ptr = text;
+    while((ptr = strchr(ptr, '#'))) {
+        if(ptr > text) {
+            if(ptr[-1] == '\\') {
+                memmove(ptr - 1, ptr, strlen(ptr)+1);
+                ++ptr;
+
+                continue;
+            }
+        }
+
+        char *ptr2 = strchr(ptr, '\n');
+        if(ptr2 != NULL)
+            memmove(ptr, ptr2 + 1, strlen(ptr2));
+        else
+            *ptr = 0;
+
+        ++ptr;
+    }
 }

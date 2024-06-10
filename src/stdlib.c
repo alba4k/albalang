@@ -201,16 +201,16 @@ int fn_print(char *str) {
     
     str = skip_whites(str);
 
-    // using numbers might give weirds results in case of something like `print(4.3, 0);`
+    // using numbers might give weirds results in case of something like `print(4.3, 0);` (I therefore return ERR_GENERIC)
     Variable *var = eval(str);
 
     int newline = 1;
     int ret = 0;
 
     char *end;
-    if(var->name)
+    if(var->name != NULL)
         end = str + strlen(var->name) + 3;
-    else if(var->string)
+    else if(var->string != NULL)
         end = str + strlen(var->string) + 2;
     else {
         del_var(var);

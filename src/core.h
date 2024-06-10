@@ -7,9 +7,8 @@
 
 Variable *eval(char *expression);
 
+void run_code(char *code);
+
 int run_line(char *code);
-
-void uncomment(char *text);
-
 
 #endif // CORE_H

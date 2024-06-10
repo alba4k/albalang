@@ -5,5 +5,6 @@ var b = ${a};
 print(${b});
 
 add(a, 3);
-print(${a});
 print(${b});
+;;;;
+print(${a});
