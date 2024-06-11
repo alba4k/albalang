@@ -98,6 +98,8 @@ void run_code(char *code) {
             debug_log("Found an if statement");
             #endif // DEBUG
 
+            *endline = ';';
+
             char *ptr = skip_whites(line+2);
             char *start = ptr;
 
@@ -127,8 +129,6 @@ void run_code(char *code) {
                 ptr[0] = 0;
                 error("if requires a number", line, ERR_GENERIC, code);
             }
-
-            *endline = ';';
 
             start[0] = '{';
             ptr = find_section_end(start);
@@ -197,6 +197,70 @@ void run_code(char *code) {
             continue;
         }
         
+        if(strncmp(line, "while", 5) == 0) {
+            #ifdef DEBUG
+            debug_log("Found a while statement");
+            #endif // DEBUG
+
+            *endline = ';';
+
+            char *condition = skip_whites(line+5);
+            char *start = condition;
+            char *end;
+
+            if(condition[0] == '$')
+                start = strchr(condition+1,'}');
+
+            start = strchr(start, '{');
+            if(start == NULL) {
+                end = strchr(line, '\n');
+                end[0] = 0;
+                error("while requires a starting '{'", line, ERR_SYNTAX, code);
+            }
+            
+            end = find_section_end(start);
+            if(end == NULL) {
+                end = strchr(line, '\n');
+                end[0] = 0;
+                error("while requires a closing '}'", line, ERR_SYNTAX, code);
+            }
+            end[0] = 0;
+
+            start[0] = 0;
+
+            Variable *var;
+
+            while((var = eval(condition))) {
+                if(var->string != NULL) {
+                    del_var(var);
+                    end = strchr(line, '\n');
+                    end[0] = 0;
+                    error("while requires a number, not a string", line, ERR_WRONG_TYPE, code);
+                }
+
+                if(var->number == NULL) {
+                    del_var(var);
+                    end = strchr(line, '\n');
+                    end[0] = 0;
+                    error("while requires a number", line, ERR_GENERIC, code);
+                }
+                
+                if(*(var->number) == 0) {
+                    del_var(var);
+                    break;
+                }
+
+                run_code(start+1);
+                del_var(var);
+            }
+
+            end[0] = '}';
+            start[0] = '{';
+            
+            line = end+1;
+            continue;
+        }
+
         // use a recursive call to run the code contained by the specified file
         if(strncmp(line, "include", 7) == 0) {
             char *ptr = skip_whites(line+7);

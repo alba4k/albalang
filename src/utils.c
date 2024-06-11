@@ -88,13 +88,9 @@ void uncomment(char *text) {
 
     char *ptr = text;
     while((ptr = strchr(ptr, '#'))) {
-        if(ptr > text) {
-            if(ptr[-1] == '\\') {
-                memmove(ptr - 1, ptr, strlen(ptr)+1);
-                ++ptr;
-
-                continue;
-            }
+        if(is_in_string(text, ptr) == true) {
+            ++ptr;
+            continue;
         }
 
         char *ptr2 = strchr(ptr, '\n');
