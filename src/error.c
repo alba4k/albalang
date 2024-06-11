@@ -14,10 +14,10 @@ void error(const char *message, const char *extra, const int code, void *memory)
     fputs("       \e[31m\e[1m<!>\e[0m ", stderr);
     switch(code) {
         case ERR_BAD_USAGE:
-            fputs("Too little or too many arguments\n", stderr);
+            fputs("Wrong argument amount\n", stderr);
             break;
         case ERR_NO_SUCH_FILE:
-            fputs("Please use an existing file\n", stderr);
+            fputs("File doesn't exist\n", stderr);
             break;
         case ERR_FILE_UNREADABLE:
             fputs("Access denied\n", stderr);

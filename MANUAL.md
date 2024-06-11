@@ -1,4 +1,6 @@
 # comments
-# print
-# delete
 # variables
+# delete
+# include
+# stdlib
+# if/else

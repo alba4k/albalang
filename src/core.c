@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "core.h"
 #include "error.h"
@@ -68,7 +70,6 @@ Variable *eval(char *expression) {
 }
 
 void run_code(char *code) {
-    
     char *endline = code;
     char *line = code;
 
@@ -91,6 +92,7 @@ void run_code(char *code) {
             continue;
         }
 
+        // use a recursive call to run the blocks relative to the if/else statement
         if(strncmp(line, "if", 2) == 0) {
             #ifdef DEBUG
             debug_log("Found an if statement");
@@ -103,25 +105,40 @@ void run_code(char *code) {
                 start = strchr(ptr+1,'}');
 
             start = strchr(start, '{');
-            if(start == NULL)
-                error("if always requires a starting {", NULL, ERR_SYNTAX, code);
+            if(start == NULL) {
+                ptr = strchr(line, '\n');
+                ptr[0] = 0;
+                error("if requires a starting '{'", line, ERR_SYNTAX, code);
+            }
             start[0] = 0;
 
             Variable *var = eval(ptr);
 
-            if(var->string != NULL)
-                error("if always requires a string", NULL, ERR_WRONG_TYPE, code);
+            if(var->string != NULL) {
+                del_var(var);
+                ptr = strchr(line, '\n');
+                ptr[0] = 0;
+                error("if requires a number, not a string", line, ERR_WRONG_TYPE, code);
+            }
 
-            if(var->number == NULL)
-                error("if always requires a number", NULL, ERR_GENERIC, code);
+            if(var->number == NULL) {
+                del_var(var);
+                ptr = strchr(line, '\n');
+                ptr[0] = 0;
+                error("if requires a number", line, ERR_GENERIC, code);
+            }
 
             *endline = ';';
 
             start[0] = '{';
             ptr = find_section_end(start);
             
-            if(ptr == NULL)
-                error("if always requires a closing }", NULL, ERR_SYNTAX, code);
+            if(ptr == NULL) {
+                del_var(var);
+                ptr = strchr(line, '\n');
+                ptr[0] = 0;
+                error("if requires a closing '}'", line, ERR_SYNTAX, code);
+            }
 
             if(*(var->number) != 0) {
                 ptr[0] = 0;
@@ -135,8 +152,12 @@ void run_code(char *code) {
                     if(strncmp(start, "else", 4) == 0) {
                         start = skip_whites(start+4);
                         ptr = find_section_end(start);
-                        if(ptr == NULL)
-                            error("else also requires a starting { and a closing }", NULL, ERR_SYNTAX, code);
+                        if(ptr == NULL) {
+                            del_var(var);
+                            ptr = strchr(line, '\n');
+                            ptr[0] = 0;
+                            error("else requires a starting '{' and a closing '}'", line, ERR_SYNTAX, code);
+                        }
                     }
             }
             else {
@@ -156,8 +177,12 @@ void run_code(char *code) {
                 ptr = skip_whites(start);
 
                 start = find_section_end(ptr);
-                if(start == NULL)
-                    error("else also requires a starting { and a closing }", NULL, ERR_SYNTAX, code);
+                if(start == NULL) {
+                    del_var(var);
+                    ptr = strchr(line, '\n');
+                    ptr[0] = 0;
+                    error("else also requires a starting { and a closing }", line, ERR_SYNTAX, code);
+                }
                 
                 start[0] = 0;
                 run_code(ptr);  // recursion, meh
@@ -172,22 +197,75 @@ void run_code(char *code) {
             continue;
         }
         
-        int ret = run_line(line);
+        // use a recursive call to run the code contained by the specified file
+        if(strncmp(line, "include", 7) == 0) {
+            char *ptr = skip_whites(line+7);
 
-        if(ret != 0) {
-            *endline = ';';
+            if(ptr == NULL)
+                error("no file to include was specified", line, ERR_SYNTAX, code);
 
-            // line formatting
-            char *ptr;
-            if((ptr = strchr(line, ';')))
-                ptr[1] = 0;
+            Variable *var = eval(ptr);
 
-            error("An error occurred while running the following line", skip_whites(line), ret, code);
+            if(var->number != NULL) {
+                del_var(var);
+                error("include requires a string, not a number", line, ERR_WRONG_TYPE, code);
+            }
+
+            if(var->string == NULL) {
+                del_var(var);
+                error("include requires a string", line, ERR_GENERIC, code);
+            }
+
+            #ifdef DEBUG
+            debug_log("Trying to run the contents of %s via include");
+            #endif // DEBUG
+
+            run_file(var->string);
+        }
+        else {  // run the line using run_line
+            int ret = run_line(line);
+
+            if(ret != 0) {
+                *endline = ';';
+
+                // line formatting
+                char *ptr;
+                if((ptr = strchr(line, ';')))
+                    ptr[1] = 0;
+
+                error("An error occurred while running the following line", skip_whites(line), ret, code);
+            }
         }
 
         *endline = ';';
         line = endline+1;
     }
+}
+
+void run_file(const char *filename) {
+    if(access(filename, F_OK) != 0)
+        error("This file does not exist in the current path", filename, ERR_NO_SUCH_FILE, NULL);
+
+    // open the file
+    FILE *fp = fopen(filename, "r");
+    if(fp == NULL)
+        error("The file could not be opened.", filename, ERR_FILE_UNREADABLE, NULL);
+
+    // get the size of the file
+    fseek(fp, 0, SEEK_END);
+    size_t len = (size_t)ftell(fp);
+    rewind(fp);
+            
+    // read the file
+    char *code = malloc(len+1);
+    code[fread(code, 1, len, fp)] = 0;
+    fclose(fp);
+
+    uncomment(code);
+
+    run_code(code);
+
+    free(code);
 }
 
 int run_line(char *code) {

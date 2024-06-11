@@ -232,6 +232,10 @@ int fn_print(char *str) {
     }
 
     #ifdef DEBUG
+    if(newline == 0) {
+        debug_log("Enforcing newline = 1 because of logging");
+        newline = 1;
+    }
     printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
     #endif // DEBUG
 

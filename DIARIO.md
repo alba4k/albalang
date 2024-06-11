@@ -126,3 +126,12 @@ Stamperà:
 1
 3
 ```
+
+# 11.6.2024
+Ora si possono includere altri file all'interno di uno già aperto, il contenuto sarà eseguito in mezzo a quello corrente
+```albalang
+include "file.al";
+
+var filename = "file2.al";
+include ${filename};
+```
