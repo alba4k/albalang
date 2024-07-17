@@ -135,3 +135,12 @@ include "file.al";
 var filename = "file2.al";
 include ${filename};
 ```
+
+# 17.7.2024
+Aggiunte due funzioni di casting
+```albalang
+var a = "54";
+
+num(a);
+str(a);
+```

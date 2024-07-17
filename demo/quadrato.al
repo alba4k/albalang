@@ -1,4 +1,4 @@
-var MAX = 3;
+var MAX = 9;
 
 var i = 0;
 add(i, ${MAX});

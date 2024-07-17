@@ -69,12 +69,13 @@ Variable *edit_var(Variable *var, double *num, char *str) {
         var->number = NULL;
     }
     else if(num != NULL) {
+        if(var->number == NULL)
+            var->number = malloc(sizeof(double));
         *(var->number) = *(num);
 
         free(var->string);
         var->string = NULL;
     }
-
     return var;
 }
 

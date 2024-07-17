@@ -147,11 +147,11 @@ int fn_delete(char *name) {
     #endif // DEBUG
 
     name = skip_whites(name);
-    if(!name)
+    if(name == NULL)
         return ERR_SYNTAX;
 
     char *end = skip_full(name);
-    if(!end)
+    if(end == NULL)
         end = name + strlen(name);
     char cache = *end;
     *end = 0;
@@ -182,6 +182,34 @@ int fn_multiply(char *str) {
     #endif // DEBUG
     
     return combine(str, 2);
+}
+
+// cast str to num
+int fn_num(char *name) {
+    #ifdef DEBUG
+    debug_log("Called num with args `%s`", name);
+    #endif // DEBUG
+
+    name = skip_whites(name);
+    if(name == NULL)
+        return ERR_SYNTAX;
+
+    char *end = skip_full(name);
+    if(end == NULL)
+        end = name + strlen(name);
+    *end = 0;
+
+    Variable *var = find_var(&var_head, name);
+    if(var == NULL)
+        return ERR_VAR_NOT_FOUND;
+    if(var->string == NULL)
+        return ERR_WRONG_TYPE;
+    
+    double num = atof(var->string);
+
+    edit_var(var, &num, NULL);
+
+    return 0;
 }
 
 // raise var1 to the var2/end -th power
@@ -249,6 +277,34 @@ int fn_print(char *str) {
     return ret;
 }
 
+// cast num to str
+int fn_str(char *name) {
+    #ifdef DEBUG
+    debug_log("Called num with args `%s`", name);
+    #endif // DEBUG
+
+    name = skip_whites(name);
+    if(name == NULL)
+        return ERR_SYNTAX;
+
+    char *end = skip_full(name);
+    if(end == NULL)
+        end = name + strlen(name);
+    *end = 0;
+
+    Variable *var = find_var(&var_head, name);
+    if(var == NULL)
+        return ERR_VAR_NOT_FOUND;
+    if(var->number == NULL)
+        return ERR_WRONG_TYPE;
+
+    char str[512];
+    sprintf(str, "%f", *(var->number));
+
+    edit_var(var, NULL, str);
+
+    return 0;
+}
 // take the square root of the variable
 int fn_sqrt(char *str) {
     #ifdef DEBUG
@@ -289,14 +345,16 @@ int fn_subtract(char *str) {
     return combine(str, 1);
 }
 
-const struct function functions[9] = {
+const struct function functions[11] = {
     {"add", fn_add},
     {"concatenate", fn_concatenate},
     {"delete", fn_delete},
     {"divide", fn_divide},
     {"multiply", fn_multiply},
+    {"num", fn_num},
     {"power", fn_power},
     {"print", fn_print},
+    {"str", fn_str},
     {"sqrt", fn_sqrt},
     {"subtract", fn_subtract},
 };
