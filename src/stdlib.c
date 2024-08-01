@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "core.h"
 #include "error.h"
@@ -277,6 +279,30 @@ int fn_print(char *str) {
     return ret;
 }
 
+// execute cmd in a shell
+int fn_shell(char *cmd) {
+    #ifdef DEBUG
+    debug_log("Called print with args `%s`", cmd);
+    #endif // DEBUG
+
+    Variable *var = eval(cmd);
+    if(var->number != NULL) {
+        del_var(var);
+        return ERR_WRONG_TYPE;
+    }
+    if(var->string == NULL) {
+        del_var(var);
+        return ERR_GENERIC;
+    }
+    
+    if(fork() != 0)
+        execlp("/bin/sh", "sh", "-c", var->string, NULL);
+    
+    wait(0);
+
+    return 0;
+}
+
 // cast num to str
 int fn_str(char *name) {
     #ifdef DEBUG
@@ -345,7 +371,41 @@ int fn_subtract(char *str) {
     return combine(str, 1);
 }
 
-const struct function functions[11] = {
+// print the type of var
+int fn_type(char *name) {
+    #ifdef DEBUG
+    debug_log("Called type with args `%s`", name);
+    #endif // DEBUG
+
+    name = skip_whites(name);
+    if(name == NULL)
+        return ERR_SYNTAX;
+
+    char *end = skip_full(name);
+    if(end == NULL)
+        end = name + strlen(name);
+    *end = 0;
+
+    Variable *var = find_var(&var_head, name);
+    if(var == NULL)
+        return ERR_VAR_NOT_FOUND;
+    if(var->string != NULL) {
+        #ifdef DEBUG
+        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
+        #endif // DEBUG
+        printf("string\n");
+    }
+    else {
+        #ifdef DEBUG
+        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
+        #endif // DEBUG
+        printf("number\n");
+    }
+
+    return 0;
+}
+
+const struct function functions[13] = {
     {"add", fn_add},
     {"concatenate", fn_concatenate},
     {"delete", fn_delete},
@@ -354,7 +414,9 @@ const struct function functions[11] = {
     {"num", fn_num},
     {"power", fn_power},
     {"print", fn_print},
+    {"shell", fn_shell},
     {"str", fn_str},
     {"sqrt", fn_sqrt},
     {"subtract", fn_subtract},
+    {"type", fn_type},
 };

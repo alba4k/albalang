@@ -144,3 +144,12 @@ var a = "54";
 num(a);
 str(a);
 ```
+
+# 1.8.2024
+Aggiunta una funzione che stampa il tipo di una variabile ed una per eseguire comandi in una shell
+```albalang
+var cmd = "pkexec pacman -Syu";
+type(cmd);
+
+shell(${cmd});
+```
