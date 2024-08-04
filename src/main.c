@@ -2,7 +2,7 @@
 
 #include "core.h"
 #include "error.h"
-#include "variables.h"
+#include "datastructures/variables.h"
 
 int main(int argc, char **argv) {
     // guards against incorrect usage

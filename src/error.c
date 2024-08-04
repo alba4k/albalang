@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "error.h"
-#include "variables.h"
+#include "datastructures/variables.h"
 
 void error(const char *message, const char *extra, const int code, void *memory) {
     fflush(stdout);

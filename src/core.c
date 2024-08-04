@@ -7,7 +7,7 @@
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"
-#include "variables.h"
+#include "datastructures/variables.h"
 
 #ifdef DEBUG
 #include "debug.h"
@@ -18,14 +18,14 @@ Variable *eval(char *expression) {
     debug_log("Trying to evaluate `%s`", expression);
     #endif // DEBUG
 
-    /* This can currently parse:
+    /* 
+     * This can currently parse:
      * ${var}
      * "text"
      * 4.5
      */
 
-    Variable *result = malloc(sizeof(Variable));
-    memset(result, 0, sizeof(Variable));
+    Variable *result = create_var(NULL, NULL, NULL);
     
     // this will eventually be a while loop I think
 
@@ -35,21 +35,25 @@ Variable *eval(char *expression) {
         return result;
 
     if(expression[0] == '$') {
-        Variable *var = access_var(expression);
+        if(expression[1] != '{')
+            return result;
+        
+        char *end = strchr(expression+2, '}');
+        if(end == NULL)
+            return NULL;
+        *end = 0;
+
+        Variable *var = find_var(&var_head, expression+2);
+
+        *end = '}';
+
         if(var == NULL)
             return result;
 
         result->name = realloc(result->name, strlen(var->name) + 1);
         strcpy(result->name, var->name);
 
-        if(var->number != NULL) {
-            result->number = realloc(result->number, sizeof(double));
-            *result->number = *var->number;
-        }
-        else if(var->string != NULL) {
-            result->string = realloc(result->string, strlen(var->string)+1);
-            strcpy(result->string, var->string);
-        }
+        edit_var(result, var->number, var->string);
     }
     else if(expression[0] == '"') {
         char *end = strchr(expression+1, '"');
@@ -57,13 +61,13 @@ Variable *eval(char *expression) {
             return result;
         
         *end = 0;
-        result->string = realloc(result->string, strlen(expression+1)+1);
-        strcpy(result->string, expression+1);
+        edit_var(result, NULL, expression+1);
         *end = '"';
     }
     else {
-        result->number = realloc(result->number, sizeof(double));
-        *result->number = atof(expression);
+        double num = atof(expression);
+
+        edit_var(result, &num, NULL);
     }
 
     return result;
@@ -382,8 +386,10 @@ int run_line(char *code) {
         }
 
         Variable *var = find_var(&var_head, name);
-        if(var == NULL)
-            add_var(&var_head, name, value->number, value->string);
+        if(var == NULL) {
+            Variable *new = create_var(name, value->number, value->string);
+            add_var(&var_head, new);
+        }
         else
             edit_var(var, value->number, value->string);
 

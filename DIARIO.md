@@ -153,3 +153,6 @@ type(cmd);
 
 shell(${cmd});
 ```
+
+# 4.8.2024
+Create le funzioni che saranno necessarie per gestire le liste

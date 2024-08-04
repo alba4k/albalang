@@ -1,10 +1,10 @@
 CC := clang
-CFLAGS := -Wall -Wextra -O2
+CFLAGS := -Wall -Wextra -O2 -l
 
-OBJ := obj/core.o obj/error.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
+OBJ := obj/core.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
 
 ifeq ($(DEBUG),1)
-	OBJ := obj/core.o obj/debug.o obj/error.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
+	OBJ := obj/core.o obj/debug.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
 	CLEAN := clean
 	CFLAGS := -Wall -Wextra -O2 -DDEBUG
 endif
@@ -21,6 +21,9 @@ obj/debug.o: src/debug.c
 obj/error.o: src/error.c
 	$(CC) $(CFLAGS) -c src/error.c -o obj/error.o
 
+obj/lists.o: src/datastructures/lists.c
+	$(CC) $(CFLAGS) -c src/datastructures/lists.c -o obj/lists.o
+
 obj/main.o: src/main.c
 	$(CC) $(CFLAGS) -c src/main.c -o obj/main.o
 
@@ -30,8 +33,8 @@ obj/stdlib.o: src/stdlib.c
 obj/utils.o: src/utils.c
 	$(CC) $(CFLAGS) -c src/utils.c -o obj/utils.o
 
-obj/variables.o: src/variables.c
-	$(CC) $(CFLAGS) -c src/variables.c -o obj/variables.o
+obj/variables.o: src/datastructures/variables.c
+	$(CC) $(CFLAGS) -c src/datastructures/variables.c -o obj/variables.o
 
 clean:
 	rm -rf obj/* build/*

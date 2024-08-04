@@ -9,7 +9,7 @@
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"
-#include "variables.h"
+#include "datastructures/variables.h"
 
 #ifdef DEBUG
 #include "debug.h"

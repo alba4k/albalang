@@ -1,9 +1,11 @@
+#pragma once
+
 #ifndef UTILS_H
 #define UTILS_H
 
 #include <stdbool.h>
 
-#include "variables.h"
+#include "datastructures/variables.h"
 
 char *find_section_end(const char *start);
 

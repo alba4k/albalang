@@ -3,7 +3,7 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "variables.h"
+#include "datastructures/variables.h"
 
 Variable *eval(char *expression);
 
