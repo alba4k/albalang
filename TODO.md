@@ -4,22 +4,21 @@
 - [x] Variables
       * str
       * num
-      * lists (multi-type?)
+- [x] Lists
 
 - [x] Branching
 - [x] While loops
 (- [ ] For loops) 
 
-- [ ] Functions
+(- [ ] Functions)
 
 Technically:
 * improve function arg parsing
-* function return values
-* eval should be able to return NULL (maybe?)
+* function return values (?)
 * refactor if/else/while parsing
-* break/continue in loops
-* change type to save the output to a variable
 
 Major stuff:
+* change type to use the syntax `type(${var}, save)`
 * something like `input(var_name)`
-* lists
+* break/continue in loops^
+* access lists with indexes (via eval()), `list[4]` or `list[${i}]` (recursive eval?))

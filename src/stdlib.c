@@ -45,6 +45,9 @@ int combine(char *str, const int mode) {
     }
     
     Variable *var2 = eval(end);
+    if(var2 == NULL)
+        return ERR_OOM;
+
     if(var2->number == NULL) {
         *(cache) = ',';
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
@@ -121,6 +124,9 @@ int fn_concatenate(char *str) {
         return ERR_SYNTAX;
 
     Variable *var2 = eval(end);
+    if(var2 == NULL)
+        return ERR_OOM;
+
     if(var2->string == NULL) {
         *(cache) = ',';
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
@@ -129,6 +135,9 @@ int fn_concatenate(char *str) {
     char *string = var2->string;
 
     char *buf = malloc(strlen(var1->string) + strlen(var2->string) + 1);
+
+    if(buf == NULL)
+        return ERR_OOM;
 
     strcpy(buf, var1->string);
     strcat(buf, string);
@@ -233,6 +242,8 @@ int fn_print(char *str) {
 
     // using numbers might give weirds results in case of something like `print(4.3, 0);` (I therefore return ERR_GENERIC)
     Variable *var = eval(str);
+    if(var == NULL)
+        return ERR_OOM;
 
     int newline = 1;
     int ret = 0;
@@ -286,6 +297,9 @@ int fn_shell(char *cmd) {
     #endif // DEBUG
 
     Variable *var = eval(cmd);
+    if(var == NULL)
+        return ERR_OOM;
+        
     if(var->number != NULL) {
         del_var(var);
         return ERR_WRONG_TYPE;

@@ -7,6 +7,7 @@
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"
+#include "datastructures/lists.h"
 #include "datastructures/variables.h"
 
 #ifdef DEBUG
@@ -26,11 +27,14 @@ Variable *eval(char *expression) {
      */
 
     Variable *result = create_var(NULL, NULL, NULL);
+
+    if(result == NULL)
+        return NULL;
     
     // this will eventually be a while loop I think
 
     expression = skip_whites(expression);
-
+            
     if(expression == NULL)
         return result;
 
@@ -51,6 +55,12 @@ Variable *eval(char *expression) {
             return result;
 
         result->name = realloc(result->name, strlen(var->name) + 1);
+
+        if(result->name == NULL) {
+            del_var(result);
+            return NULL;
+        }
+
         strcpy(result->name, var->name);
 
         edit_var(result, var->number, var->string);
@@ -119,6 +129,9 @@ void run_code(char *code) {
             start[0] = 0;
 
             Variable *var = eval(ptr);
+
+            if(var == NULL)
+                error("Not enough memory", code, ERR_OOM, NULL);
 
             if(var->string != NULL) {
                 del_var(var);
@@ -257,6 +270,8 @@ void run_code(char *code) {
                 run_code(start+1);
                 del_var(var);
             }
+            if(var == NULL)
+                error("Not enough memory", code, ERR_OOM, NULL);
 
             end[0] = '}';
             start[0] = '{';
@@ -273,6 +288,9 @@ void run_code(char *code) {
                 error("no file to include was specified", line, ERR_SYNTAX, code);
 
             Variable *var = eval(ptr);
+
+            if(var == NULL)
+                error("Not enough memory", code, ERR_OOM, NULL);
 
             if(var->number != NULL) {
                 del_var(var);
@@ -326,6 +344,9 @@ void run_file(const char *filename) {
             
     // read the file
     char *code = malloc(len+1);
+    if(code == NULL)
+        error("Not enough memory", filename, ERR_OOM, NULL);
+
     code[fread(code, 1, len, fp)] = 0;
     fclose(fp);
 
@@ -348,7 +369,7 @@ int run_line(char *code) {
 
     code = skip_whites(code);
 
-    // we have something like `  var   variable = 80.9  `
+    // we have something like `var   variable = 80.9  `
     if(strncmp(code, "var ", 4) == 0) {
         ptr = skip_whites(code+4);
         if(ptr == NULL)
@@ -375,6 +396,8 @@ int run_line(char *code) {
         // `= 80.9`
 
         Variable *value = eval(end+1);
+        if(value == NULL)
+            return ERR_OOM;
         
         // read ` 80.9`
 
@@ -388,7 +411,11 @@ int run_line(char *code) {
         Variable *var = find_var(&var_head, name);
         if(var == NULL) {
             Variable *new = create_var(name, value->number, value->string);
-            add_var(&var_head, new);
+
+            if(new == NULL)
+                return ERR_OOM;
+
+            move_var(&var_head, new);
         }
         else
             edit_var(var, value->number, value->string);
@@ -397,6 +424,94 @@ int run_line(char *code) {
 
         if(ptr2 != NULL)
             *ptr2 = cache;
+
+        return 0;
+    }
+    // we have something like `list L << var  `
+    else if(strncmp(code, "list ", 5) == 0) {
+        ptr = skip_whites(code+5);
+        if(ptr == NULL)
+            return ERR_SYNTAX;
+
+        // `L << var  `
+
+        char *ptr2;
+        char *end = skip_full(ptr);
+        char cache = 0;
+
+        if((ptr2 = strstr(ptr, "<<"))) {
+            if(end == NULL || ptr2+1 == end)
+                end = ptr2;
+            cache = *end;
+            *end = 0;
+
+            List *list = find_list(&list_head, ptr);
+
+            if(list == NULL) {
+                list = create_list(ptr);
+
+                if(list == NULL)
+                    return ERR_OOM;
+
+                add_list(&list_head, list);
+            }
+
+            *end = cache;
+
+            ptr2 += 2;
+
+            // `var  `
+
+            ptr2 = skip_whites(ptr2);
+            if(ptr2 == NULL)
+                return ERR_SYNTAX;
+
+            Variable *var = find_var(&var_head, ptr2);
+            if(var == NULL)
+                return ERR_VAR_NOT_FOUND;
+            Variable *list_var = find_var(&(list->head), ptr2);
+
+            if(list_var != NULL) {
+                edit_var(list_var, var->number, var->string);
+
+                del_var(var);
+            }
+            else
+                move_var(&(list->head), var);
+        }
+        else if((ptr2 = strstr(ptr, ">>"))) {
+            if(end == NULL || ptr2+1 == end)
+                end = ptr2;
+            cache = *end;
+            *end = 0;
+
+            List *list = find_list(&list_head, ptr);
+
+            *end = cache;
+
+            if(list == NULL)
+                return ERR_LIST_NOT_FOUND;
+
+            ptr2 += 2;
+
+            ptr2 = skip_whites(ptr2);
+            if(ptr2 == NULL)
+                return ERR_SYNTAX;
+
+            Variable *list_var = find_var(&(list->head), ptr2);
+            if(list_var == NULL)
+                return ERR_VAR_NOT_FOUND;
+            Variable *var = find_var(&var_head, ptr2);
+            if(var != NULL) {
+                edit_var(var, list_var->number, list_var->string);
+
+                del_var(list_var);
+            }
+            else
+                move_var(&var_head, list_var);
+        }
+        else
+            return ERR_SYNTAX;
 
         return 0;
     }

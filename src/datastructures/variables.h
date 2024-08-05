@@ -18,7 +18,7 @@ typedef struct Variable Variable;
 // heads of the linked list, defined in variables.c
 extern Variable var_head;
 
-Variable *add_var(struct Variable *head, Variable *new);
+Variable *move_var(struct Variable *head, Variable *new);
 
 Variable *create_var(char *name, double *num, char *str);
 

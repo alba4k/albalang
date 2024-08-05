@@ -156,3 +156,15 @@ shell(${cmd});
 
 # 4.8.2024
 Create le funzioni che saranno necessarie per gestire le liste
+
+# 5.8.2024
+Aggiunte le liste.
+aAncora non è stato aggiunto il concetto di accesso tramite indice, è quindi necessario estrarre una variabile dalla lista (tramite il nome) per utilizzarla, per poi eventualmente reinserirla.
+```
+var x = 3;
+
+list y << x;
+
+list y >> x;
+print(${x});
+```

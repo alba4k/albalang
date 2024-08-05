@@ -3,6 +3,7 @@
 #include "core.h"
 #include "error.h"
 #include "datastructures/variables.h"
+#include "datastructures/lists.h"
 
 int main(int argc, char **argv) {
     // guards against incorrect usage
@@ -14,6 +15,10 @@ int main(int argc, char **argv) {
     // clear variable linked list
     while(var_head.next != NULL)
         del_var(var_head.next);
+    
+    // clear list linked list
+    while(list_head.next != NULL)
+        del_list(list_head.next);
 
     return 0;
 }

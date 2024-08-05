@@ -6,9 +6,15 @@
 
 List list_head = {
     NULL,
+    {
+        NULL,
+        NULL,
+        NULL,
+        NULL,
+        NULL
+    },
     NULL,
-    NULL,
-    NULL,
+    NULL
 };
 
 #ifdef DEBUG
@@ -38,16 +44,34 @@ List *add_list(struct List *head, List *new) {
 
 List *create_list(char *name) {
     List *new = malloc(sizeof(List));
+    
+    if(new == NULL)
+        return NULL;
+
     memset(new, 0, sizeof(List));
 
     #ifdef DEBUG
-        debug_log("Creating list %s (%p)", name, );
+        debug_log("Creating list %s (%p)", name, new);
     #endif // DEBUG
-
 
     if(name != NULL) {
         new->name = malloc(sizeof(name)+1);
+    
+        if(new->name == NULL) {
+            free(new);
+            return NULL;
+        }
+
+        new->head.name = malloc(sizeof(name)+1);
+
+        if(new->name == NULL) {
+            free(new->name);
+            free(new);
+            return NULL;
+        }
+
         strcpy(new->name, name);
+        strcpy(new->head.name, name);
     }
 
     return new;
@@ -70,10 +94,9 @@ int del_list(struct List *list) {
     free(list->name);
     
     // clear variable linked list
-    while(list->first_var->next != NULL)
-        del_var(list->first_var->next);
-    del_var(list->first_var);
-
+    while(list->head.next != NULL)
+        del_var(list->head.next);
+        
     free(list);
 
     return 0;

@@ -1,11 +1,12 @@
 ### this is a concept, for now. Not implemented yet.
 
-var a;
-
 var b = 3;
 var c = "ciao";
 
-push(a, ${b});
-push(a, ${c});
+list a << b;
+list a << c;
 
-pop(a);
+list a >> c;
+print(${c});
+
+list b << c;

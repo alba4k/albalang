@@ -1,11 +1,10 @@
 CC := clang
-CFLAGS := -Wall -Wextra -O2 -l
+CFLAGS := -Wall -Wextra -O2
 
 OBJ := obj/core.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
 
 ifeq ($(DEBUG),1)
 	OBJ := obj/core.o obj/debug.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
-	CLEAN := clean
 	CFLAGS := -Wall -Wextra -O2 -DDEBUG
 endif
 

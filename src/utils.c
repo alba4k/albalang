@@ -69,8 +69,6 @@ char *skip_whites(char *ptr) {
 char *skip_full(char *ptr) {
     if(ptr == NULL)
         return NULL;
-    if(ptr[0] == 0)
-        return NULL;
 
     while(*ptr) {
         if(*ptr == ' ' || *ptr == '\n')

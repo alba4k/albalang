@@ -20,7 +20,7 @@ struct List
 {
     char *name;
 
-    Variable *first_var;
+    Variable head;
 
     struct List *prev;
     struct List *next;
