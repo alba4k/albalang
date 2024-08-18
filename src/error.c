@@ -41,9 +41,6 @@ void error(const char *message, const char *extra, const int code, void *memory)
         case ERR_LIST_NOT_FOUND:
             fputs("That list couldn't be found\n", stderr);
             break;
-        case ERR_LIST_EXISTS:
-            fputs("That list already exists\n", stderr);
-            break;
         default:
             fputs("Unknown error\n", stderr);
     }

@@ -159,7 +159,7 @@ Create le funzioni che saranno necessarie per gestire le liste
 
 # 5.8.2024
 Aggiunte le liste.
-aAncora non è stato aggiunto il concetto di accesso tramite indice, è quindi necessario estrarre una variabile dalla lista (tramite il nome) per utilizzarla, per poi eventualmente reinserirla.
+Ancora non è stato aggiunto il concetto di accesso tramite indice, è quindi necessario estrarre una variabile dalla lista (tramite il nome) per utilizzarla, per poi eventualmente reinserirla.
 ```albalang
 var x = 3;
 
@@ -170,10 +170,20 @@ print(${x});
 ```
 
 # 18.8.2024
-Ora si può accedere ad un elemento di una lista anche tramite un indice
+Ora si può accedere ad un elemento di una lista anche tramite un indice.
+Inoltre una lista può essere eliminata con `delete()`.
 ```albalang
 var x = 3;
 
 list y << x;
 print(y[1]);
+
+delete(y);
+```
+Per richiedere input da un utente si potrà invece usare la sintassi
+```
+var a = "";
+input(a);
+
+print(${a})
 ```

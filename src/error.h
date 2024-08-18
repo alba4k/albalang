@@ -19,7 +19,6 @@
 
 // related to lists
 #define ERR_LIST_NOT_FOUND 80
-#define ERR_LIST_EXISTS 81
 
 void error(const char *message, const char *extra, const int code, void *memory);
 

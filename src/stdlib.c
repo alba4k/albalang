@@ -10,6 +10,7 @@
 #include "stdlib.h"
 #include "utils.h"
 #include "datastructures/variables.h"
+#include "datastructures/lists.h"
 
 #ifdef DEBUG
 #include "debug.h"
@@ -87,7 +88,7 @@ int combine(char *str, const int mode) {
 // add the contents of var2/end to var1
 int fn_add(char *str) {
     #ifdef DEBUG
-    debug_log("Called add with args `%s`", str);
+    debug_log("Called add() with args `%s`", str);
     #endif // DEBUG
     
     return combine(str, 0);
@@ -96,7 +97,7 @@ int fn_add(char *str) {
 // concatenate the contents of var2/end with var1
 int fn_concatenate(char *str) {
     #ifdef DEBUG
-    debug_log("Called concatenate with args `%s`", str);
+    debug_log("Called concatenate() with args `%s`", str);
     #endif // DEBUG
     
     char *var1_name = skip_whites(str);
@@ -154,25 +155,25 @@ int fn_concatenate(char *str) {
 // delete a variable from memory
 int fn_delete(char *name) {
     #ifdef DEBUG
-    debug_log("Called delete with args `%s`", name);
+    debug_log("Called delete() with args `%s`", name);
     #endif // DEBUG
 
     name = skip_whites(name);
     if(name == NULL)
         return ERR_SYNTAX;
 
-    char *end = skip_full(name);
-    if(end == NULL)
-        end = name + strlen(name);
-    char cache = *end;
-    *end = 0;
+    Variable *var = find_var(&var_head, name);
+    if(var != NULL) {
+        del_var(var);
 
-    int ret = del_var(find_var(&var_head, name));
+        return 0;
+    }
 
-    *end = cache;
+    List *list = find_list(&list_head, name);
+    if(list == NULL)
+        return ERR_LIST_NOT_FOUND;
 
-    if(ret == -1)
-        return ERR_VAR_NOT_FOUND;
+    del_list(list);
 
     return 0;
 }
@@ -180,16 +181,44 @@ int fn_delete(char *name) {
 // divide the contents of var2/end by var1
 int fn_divide(char *str) {
     #ifdef DEBUG
-    debug_log("Called divide with args `%s`", str);
+    debug_log("Called divide() with args `%s`", str);
     #endif // DEBUG
     
     return combine(str, 3);
 }
 
+// read a maximum of 0x4000 characters from stdin
+int fn_input(char *name) {
+    #ifdef DEBUG
+    debug_log("Called input() with args `%s`", name);
+    #endif // DEBUG
+    
+    Variable *var = find_var(&var_head, name);
+    if(var == NULL)
+        return ERR_VAR_NOT_FOUND;
+
+    const int MAX = 0x4000;
+    char buf[MAX];
+
+    #ifdef DEBUG
+    printf("[\e[1m\e[36mINPUT\e[37m\e[0m] ");
+    #endif // DEBUG
+
+    fgets(buf, 0x4000, stdin);
+
+    char *end = strchr(buf, '\n');
+    if(end != NULL)
+        *end = 0;
+
+    edit_var(var, NULL, buf);
+
+    return 0;
+}
+
 // add the contents of var2/end to var1
 int fn_multiply(char *str) {
     #ifdef DEBUG
-    debug_log("Called multiply with args `%s`", str);
+    debug_log("Called multiply() with args `%s`", str);
     #endif // DEBUG
     
     return combine(str, 2);
@@ -198,7 +227,7 @@ int fn_multiply(char *str) {
 // cast str to num
 int fn_num(char *name) {
     #ifdef DEBUG
-    debug_log("Called num with args `%s`", name);
+    debug_log("Called num() with args `%s`", name);
     #endif // DEBUG
 
     name = skip_whites(name);
@@ -226,7 +255,7 @@ int fn_num(char *name) {
 // raise var1 to the var2/end -th power
 int fn_power(char *str) {
     #ifdef DEBUG
-    debug_log("Called power with args `%s`", str);
+    debug_log("Called power() with args `%s`", str);
     #endif // DEBUG
     
     return combine(str, 4);
@@ -235,7 +264,7 @@ int fn_power(char *str) {
 // print some text or a variable
 int fn_print(char *str) {
     #ifdef DEBUG
-    debug_log("Called print with args `%s`", str);
+    debug_log("Called print() with args `%s`", str);
     #endif // DEBUG
     
     str = skip_whites(str);
@@ -293,7 +322,7 @@ int fn_print(char *str) {
 // execute cmd in a shell
 int fn_shell(char *cmd) {
     #ifdef DEBUG
-    debug_log("Called print with args `%s`", cmd);
+    debug_log("Called print() with args `%s`", cmd);
     #endif // DEBUG
 
     Variable *var = eval(cmd);
@@ -320,7 +349,7 @@ int fn_shell(char *cmd) {
 // cast num to str
 int fn_str(char *name) {
     #ifdef DEBUG
-    debug_log("Called num with args `%s`", name);
+    debug_log("Called num() with args `%s`", name);
     #endif // DEBUG
 
     name = skip_whites(name);
@@ -348,7 +377,7 @@ int fn_str(char *name) {
 // take the square root of the variable
 int fn_sqrt(char *str) {
     #ifdef DEBUG
-    debug_log("Called sqrt with args `%s`", str);
+    debug_log("Called sqrt() with args `%s`", str);
     #endif // DEBUG
     
     char *name = skip_whites(str);
@@ -379,7 +408,7 @@ int fn_sqrt(char *str) {
 // add the contents of var2/end to var1
 int fn_subtract(char *str) {
     #ifdef DEBUG
-    debug_log("Called subtract with args `%s`", str);
+    debug_log("Called subtract() with args `%s`", str);
     #endif // DEBUG
     
     return combine(str, 1);
@@ -388,7 +417,7 @@ int fn_subtract(char *str) {
 // print the type of var
 int fn_type(char *name) {
     #ifdef DEBUG
-    debug_log("Called type with args `%s`", name);
+    debug_log("Called type() with args `%s`", name);
     #endif // DEBUG
 
     name = skip_whites(name);
@@ -419,11 +448,12 @@ int fn_type(char *name) {
     return 0;
 }
 
-const struct function functions[13] = {
+const struct function functions[14] = {
     {"add", fn_add},
     {"concatenate", fn_concatenate},
     {"delete", fn_delete},
     {"divide", fn_divide},
+    {"input", fn_input},
     {"multiply", fn_multiply},
     {"num", fn_num},
     {"power", fn_power},

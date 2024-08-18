@@ -19,5 +19,5 @@ Technically:
 
 Major stuff:
 * change type to use the syntax `type(${var}, save)`
-* something like `input(var_name)`
 * break/continue in loops
+* function to compare two numbers or two strings
