@@ -20,5 +20,4 @@ Technically:
 Major stuff:
 * change type to use the syntax `type(${var}, save)`
 * something like `input(var_name)`
-* break/continue in loops^
-* access lists with indexes (via eval()), `list[4]` or `list[${i}]` (recursive eval?))
+* break/continue in loops

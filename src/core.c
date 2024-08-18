@@ -38,11 +38,13 @@ Variable *eval(char *expression) {
     if(expression == NULL)
         return result;
 
+    char *end;
+
     if(expression[0] == '$') {
         if(expression[1] != '{')
             return result;
         
-        char *end = strchr(expression+2, '}');
+        end = strchr(expression+2, '}');
         if(end == NULL)
             return NULL;
         *end = 0;
@@ -66,13 +68,60 @@ Variable *eval(char *expression) {
         edit_var(result, var->number, var->string);
     }
     else if(expression[0] == '"') {
-        char *end = strchr(expression+1, '"');
+        end = strchr(expression+1, '"');
         if(end == NULL)
             return result;
         
         *end = 0;
         edit_var(result, NULL, expression+1);
         *end = '"';
+    }
+    else if((end = strchr(expression, '['))) {
+        char *end2 = strchr(end, ']');
+        if(end2 == NULL)
+            return result;
+
+        *end = 0;
+        *end2 = 0;
+        Variable *var = eval(end+1); // recursion? ehhh
+        *end2 = ']';
+
+        if(var == NULL) {
+            del_var(var);
+            *end = '[';
+            return NULL;
+        }
+        if(var->string != NULL || var->number == NULL) {
+            del_var(var);
+            *end = '[';
+            return result;
+        }
+
+        List *list = find_list(&list_head, expression);
+        *end = '[';
+        
+        if(list == NULL)
+            return result;
+        
+        Variable *current = list->head.next;
+        for(int i = 0; i < (int)*var->number && current != NULL; ++i)
+            current = current->next;
+
+        del_var(var);
+
+        if(current == NULL)
+            return result;
+        
+        result->name = realloc(result->name, strlen(current->name) + 1);
+
+        if(result->name == NULL) {
+            del_var(result);
+            return NULL;
+        }
+
+        strcpy(result->name, current->name);
+
+        edit_var(result, current->number, current->string);
     }
     else {
         double num = atof(expression);

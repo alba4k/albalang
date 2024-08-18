@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include "variables.h"
+#include "../utils.h" // Don't really like relying on this bus ok (just for find_var)
 
 Variable var_head = {
     NULL,
@@ -154,9 +155,25 @@ Variable *edit_var(Variable *var, double *num, char *str) {
 }
 
 Variable *find_var(Variable *head, char *name) {
-    for(Variable *current = head->next; current != NULL; current = current->next) {
-        if(strcmp(current->name, name) == 0)
-            return current;
+    if(head == NULL || name == NULL)
+        return NULL;
+
+    name = skip_whites(name);
+    char *end = skip_full(name);
+    char cache;
+    if(end != NULL) {
+        cache = *end;
+        *end = 0;
     }
-    return NULL;
+
+    Variable *current;
+    for(current = head->next; current != NULL; current = current->next) {
+        if(strcmp(current->name, name) == 0)
+            break;
+    }
+
+    if(end != NULL)
+        *end = cache;
+
+    return current;
 }

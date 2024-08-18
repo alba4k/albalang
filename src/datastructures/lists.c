@@ -3,6 +3,7 @@
 
 #include "lists.h"
 #include "variables.h"
+#include "../utils.h" // Don't really like relying on this bus ok (just for find_var)
 
 List list_head = {
     NULL,
@@ -103,10 +104,25 @@ int del_list(struct List *list) {
 }
 
 List *find_list(List *head, char *name) {
-    for(List *current = head->next; current != NULL; current = current->next) {
-        if(strcmp(current->name, name) == 0)
-            return current;
+    if(head == NULL || name == NULL)
+        return NULL;
+
+    name = skip_whites(name);
+    char *end = skip_full(name);
+    char cache;
+    if(end != NULL) {
+        cache = *end;
+        *end = 0;
     }
 
-    return NULL;
+    List *current;
+    for(current = head->next; current != NULL; current = current->next) {
+        if(strcmp(current->name, name) == 0)
+            break;
+    }
+
+    if(end != NULL)
+        *end = cache;
+
+    return current;
 }

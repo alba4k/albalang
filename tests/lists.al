@@ -9,4 +9,8 @@ list a << c;
 list a >> c;
 print(${c});
 
-list b << c;
+list a << c;
+
+# a includes b and c
+
+print( a [ 1 ] );
