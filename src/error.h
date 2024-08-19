@@ -12,6 +12,7 @@
 // related to syntax
 #define ERR_GENERIC 60
 #define ERR_SYNTAX 61
+#define ERR_ARGC 62
 
 // related to variables
 #define ERR_VAR_NOT_FOUND 70

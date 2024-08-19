@@ -3,11 +3,11 @@
 #ifndef STDLIB_H
 #define STDLIB_H
 
-struct function {
+struct Function {
     const char *name;
-    int (*func)(char *);
+    int (*func)(char **);
 };
 
-extern const struct function functions[14];
+extern const struct Function functions[14];
 
 #endif // STDLIB_H

@@ -10,6 +10,27 @@
 #include "debug.h"
 #endif // DEBUG
 
+// return a section of the heap containing a cleaner version of str
+char *clean_string(char *str) {
+    str = skip_whites(str);
+    if(str == NULL)
+        return NULL;
+
+    char *start = malloc(strlen(str) + 1);
+    if(start == NULL)
+        return NULL;
+    
+    strcpy(start, str);
+
+    char *end = start + strlen(start);
+    while(end[-1] == ' ' || end[-1] == '\n')
+        --end;
+
+    *end = 0;
+
+    return start;
+}
+
 // find the closing } to a section starting with { and return the following character
 char *find_section_end(const char *start) {
     if(start[0] != '{')
@@ -47,6 +68,57 @@ bool is_in_string(const char *str, const char *place) {
         return true;
 
     return false;
+}
+
+// divide arguments from a given strings into different elements.
+// return NULL if or if no args were given
+char **parse_args(char *str) {
+    int argc = 0;
+    char **argv = malloc(sizeof(char*));
+    if(argv == NULL)
+        return NULL;
+
+    char *buf = clean_string(str);
+    if(buf[0] == 0) {
+        free(argv);
+        return NULL;
+    }
+
+    char *start = buf;
+    char *end;
+    do {
+        end = strchr(start, ',');
+
+        if(end != NULL) {
+            if(is_in_string(buf, end) == true) {
+                start = end+1;
+                continue;
+            }
+            *end = 0;
+        }
+
+        ++argc;
+
+        argv = realloc(argv, (argc+1)*sizeof(char*));
+        if(argv == NULL) {
+            free(buf);
+            return NULL;
+        }
+
+        argv[argc-1] = clean_string(start);
+        if(argv[argc-1] == NULL) {
+            free(buf);
+            free(argv);
+            return NULL;
+        }
+        start = end+1;
+    }
+    while(end != NULL);
+
+    argv[argc] = NULL;
+
+    free(buf);
+    return argv;
 }
 
 // skip every whitespace, return the first full character

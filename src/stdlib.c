@@ -17,42 +17,23 @@
 #endif // DEBUG
 
 // this function is called by most binary operators
-int combine(char *str, const int mode) {
-    char *var1_name = skip_whites(str);
-    char *end = strchr(var1_name, ',');
+int combine(char **argv, const int mode) {
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+    if(argv[1] == NULL)
+        return ERR_ARGC;
 
-    if(end == NULL)
-        return ERR_SYNTAX;
-
-    *end = 0;
-    char *cache = end;
-
-    Variable *var1 = find_var(&var_head, var1_name);
-
-    if(var1 == NULL) {
-        *(cache) = ',';
-        
+    Variable *var1 = find_var(&var_head, argv[0]);
+    if(var1 == NULL)
         return ERR_VAR_NOT_FOUND;
-    }
-    if(var1->string != NULL) {
-        *(cache) = ',';
+    if(var1->string != NULL)
         return ERR_WRONG_TYPE;
-    }
     
-    end = skip_whites(end+1);
-    if(end == NULL) {
-        *(cache) = ',';
-        return ERR_SYNTAX;
-    }
-    
-    Variable *var2 = eval(end);
+    Variable *var2 = eval(argv[1]);
     if(var2 == NULL)
         return ERR_OOM;
-
-    if(var2->number == NULL) {
-        *(cache) = ',';
+    if(var2->number == NULL)
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
-    }
 
     double value = *var2->number;
     
@@ -75,63 +56,45 @@ int combine(char *str, const int mode) {
             value = pow(*(var1->number), value);
             break;
         default:
-            *(cache) = ',';
-            return ERR_SYNTAX;
+            return ERR_GENERIC;
     }
 
     edit_var(var1, &value, NULL);
 
-    *cache = ',';
     return 0;
 }
 
 // add the contents of var2/end to var1
-int fn_add(char *str) {
+int fn_add(char **argv) {
     #ifdef DEBUG
-    debug_log("Called add() with args `%s`", str);
+    debug_log("Called add()");
     #endif // DEBUG
     
-    return combine(str, 0);
+    return combine(argv, 0);
 }
 
 // concatenate the contents of var2/end with var1
-int fn_concatenate(char *str) {
+int fn_concatenate(char **argv) {
     #ifdef DEBUG
-    debug_log("Called concatenate() with args `%s`", str);
+    debug_log("Called concatenate()");
     #endif // DEBUG
     
-    char *var1_name = skip_whites(str);
-    char *end = strchr(var1_name, ',');
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+    if(argv[1] == NULL)
+        return ERR_ARGC;
 
-    if(end == NULL)
-        return ERR_SYNTAX;
-
-    *end = 0;
-    char *cache = end;
-
-    Variable *var1 = find_var(&var_head, var1_name);
-
-    if(var1 == NULL) {
-        *(cache) = ',';
+    Variable *var1 = find_var(&var_head, argv[0]);
+    if(var1 == NULL)
         return ERR_VAR_NOT_FOUND;
-    }
-    if(var1->number != NULL) {
-        *(cache) = ',';
+    if(var1->number != NULL)
         return ERR_WRONG_TYPE;
-    }
     
-    end = skip_whites(end+1);
-    if(end == NULL) 
-        return ERR_SYNTAX;
-
-    Variable *var2 = eval(end);
+    Variable *var2 = eval(argv[1]);
     if(var2 == NULL)
         return ERR_OOM;
-
-    if(var2->string == NULL) {
-        *(cache) = ',';
+    if(var2->string == NULL)
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
-    }
 
     char *string = var2->string;
 
@@ -148,28 +111,26 @@ int fn_concatenate(char *str) {
     del_var(var2);
     free(buf);
 
-    *cache = ',';
     return 0;
 }
 
 // delete a variable from memory
-int fn_delete(char *name) {
+int fn_delete(char **argv) {
     #ifdef DEBUG
-    debug_log("Called delete() with args `%s`", name);
+    debug_log("Called delete()");
     #endif // DEBUG
 
-    name = skip_whites(name);
-    if(name == NULL)
-        return ERR_SYNTAX;
+    if(argv[0] == NULL)
+        return ERR_ARGC;
 
-    Variable *var = find_var(&var_head, name);
+    Variable *var = find_var(&var_head, argv[0]);
     if(var != NULL) {
         del_var(var);
 
         return 0;
     }
 
-    List *list = find_list(&list_head, name);
+    List *list = find_list(&list_head, argv[0]);
     if(list == NULL)
         return ERR_LIST_NOT_FOUND;
 
@@ -179,21 +140,24 @@ int fn_delete(char *name) {
 }
 
 // divide the contents of var2/end by var1
-int fn_divide(char *str) {
+int fn_divide(char **argv) {
     #ifdef DEBUG
-    debug_log("Called divide() with args `%s`", str);
+    debug_log("Called divide()");
     #endif // DEBUG
     
-    return combine(str, 3);
+    return combine(argv, 3);
 }
 
 // read a maximum of 0x4000 characters from stdin
-int fn_input(char *name) {
+int fn_input(char **argv) {
     #ifdef DEBUG
-    debug_log("Called input() with args `%s`", name);
+    debug_log("Called input()");
     #endif // DEBUG
     
-    Variable *var = find_var(&var_head, name);
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+        
+    Variable *var = find_var(&var_head, argv[0]);
     if(var == NULL)
         return ERR_VAR_NOT_FOUND;
 
@@ -216,30 +180,24 @@ int fn_input(char *name) {
 }
 
 // add the contents of var2/end to var1
-int fn_multiply(char *str) {
+int fn_multiply(char **argv) {
     #ifdef DEBUG
-    debug_log("Called multiply() with args `%s`", str);
+    debug_log("Called multiply()");
     #endif // DEBUG
     
-    return combine(str, 2);
+    return combine(argv, 2);
 }
 
 // cast str to num
-int fn_num(char *name) {
+int fn_num(char **argv) {
     #ifdef DEBUG
-    debug_log("Called num() with args `%s`", name);
+    debug_log("Called num()");
     #endif // DEBUG
 
-    name = skip_whites(name);
-    if(name == NULL)
-        return ERR_SYNTAX;
-
-    char *end = skip_full(name);
-    if(end == NULL)
-        end = name + strlen(name);
-    *end = 0;
-
-    Variable *var = find_var(&var_head, name);
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+        
+    Variable *var = find_var(&var_head, argv[0]);
     if(var == NULL)
         return ERR_VAR_NOT_FOUND;
     if(var->string == NULL)
@@ -253,52 +211,34 @@ int fn_num(char *name) {
 }
 
 // raise var1 to the var2/end -th power
-int fn_power(char *str) {
+int fn_power(char **argv) {
     #ifdef DEBUG
-    debug_log("Called power() with args `%s`", str);
+    debug_log("Called power()");
     #endif // DEBUG
     
-    return combine(str, 4);
+    return combine(argv, 4);
 }
 
 // print some text or a variable
-int fn_print(char *str) {
+int fn_print(char **argv) {
     #ifdef DEBUG
-    debug_log("Called print() with args `%s`", str);
+    debug_log("Called print()");
     #endif // DEBUG
     
-    str = skip_whites(str);
+    if(argv[0] == NULL)
+        return ERR_ARGC;
 
-    // using numbers might give weirds results in case of something like `print(4.3, 0);` (I therefore return ERR_GENERIC)
-    Variable *var = eval(str);
+    Variable *var = eval(argv[0]);
     if(var == NULL)
         return ERR_OOM;
 
-    int newline = 1;
+    int newline = argv[1] ? atoi(argv[1]) : 1;
     int ret = 0;
-
-    char *end;
-    if(var->name != NULL)
-        end = str + strlen(var->name) + 3;
-    else if(var->string != NULL)
-        end = str + strlen(var->string) + 2;
-    else {
-        del_var(var);
-        return ERR_GENERIC;
-    }
     
-    // newline ?
-    char *second_arg = skip_whites(end);
-    if(second_arg != NULL)
-        if(second_arg[0] == ',') {
-            ++second_arg;
-            newline = atoi(second_arg);
-        }
-
     // newline can only be 0 or 1  
     if(newline != 0 && newline != 1) {
         del_var(var);
-        return ERR_GENERIC;
+        return ERR_SYNTAX;
     }
 
     #ifdef DEBUG
@@ -320,12 +260,15 @@ int fn_print(char *str) {
 }
 
 // execute cmd in a shell
-int fn_shell(char *cmd) {
+int fn_shell(char **argv) {
     #ifdef DEBUG
-    debug_log("Called print() with args `%s`", cmd);
+    debug_log("Called print()");
     #endif // DEBUG
 
-    Variable *var = eval(cmd);
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+
+    Variable *var = eval(argv[0]);
     if(var == NULL)
         return ERR_OOM;
         
@@ -347,53 +290,38 @@ int fn_shell(char *cmd) {
 }
 
 // cast num to str
-int fn_str(char *name) {
+int fn_str(char **argv) {
     #ifdef DEBUG
-    debug_log("Called num() with args `%s`", name);
+    debug_log("Called num()");
     #endif // DEBUG
 
-    name = skip_whites(name);
-    if(name == NULL)
-        return ERR_SYNTAX;
-
-    char *end = skip_full(name);
-    if(end == NULL)
-        end = name + strlen(name);
-    *end = 0;
-
-    Variable *var = find_var(&var_head, name);
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+        
+    Variable *var = find_var(&var_head, argv[0]);
     if(var == NULL)
         return ERR_VAR_NOT_FOUND;
     if(var->number == NULL)
         return ERR_WRONG_TYPE;
 
-    char str[512];
-    sprintf(str, "%f", *(var->number));
+    char str[256];
+    snprintf(str, 256, "%f", *(var->number));
 
     edit_var(var, NULL, str);
 
     return 0;
 }
+
 // take the square root of the variable
-int fn_sqrt(char *str) {
+int fn_sqrt(char **argv) {
     #ifdef DEBUG
-    debug_log("Called sqrt() with args `%s`", str);
+    debug_log("Called sqrt()");
     #endif // DEBUG
     
-    char *name = skip_whites(str);
-    char *end = skip_full(name);
-    char cache = 0;
+    if(argv[0] == NULL)
+        return ERR_ARGC;
 
-    if(end != NULL) {
-        cache = *end;
-        *end = 0;
-    }
-
-    Variable *var = find_var(&var_head, name);
-
-    if(end != NULL)
-        *end = cache;
-
+    Variable *var = find_var(&var_head, argv[0]);
     if(var == NULL)
         return ERR_VAR_NOT_FOUND;
     if(var->string != NULL)
@@ -406,49 +334,39 @@ int fn_sqrt(char *str) {
 }
 
 // add the contents of var2/end to var1
-int fn_subtract(char *str) {
+int fn_subtract(char **argv) {
     #ifdef DEBUG
-    debug_log("Called subtract() with args `%s`", str);
+    debug_log("Called subtract()");
     #endif // DEBUG
     
-    return combine(str, 1);
+    return combine(argv, 1);
 }
 
 // print the type of var
-int fn_type(char *name) {
+int fn_type(char **argv) {
     #ifdef DEBUG
-    debug_log("Called type() with args `%s`", name);
+    debug_log("Called type()");
     #endif // DEBUG
 
-    name = skip_whites(name);
-    if(name == NULL)
-        return ERR_SYNTAX;
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+    if(argv[1] == NULL)
+        return ERR_ARGC;
+        
+    Variable *var1 = find_var(&var_head, argv[0]);
+    Variable *var2 = find_var(&var_head, argv[1]);
 
-    char *end = skip_full(name);
-    if(end == NULL)
-        end = name + strlen(name);
-    *end = 0;
-
-    Variable *var = find_var(&var_head, name);
-    if(var == NULL)
+    if(var1 == NULL || var2 == NULL)
         return ERR_VAR_NOT_FOUND;
-    if(var->string != NULL) {
-        #ifdef DEBUG
-        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
-        #endif // DEBUG
-        printf("string\n");
-    }
-    else {
-        #ifdef DEBUG
-        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
-        #endif // DEBUG
-        printf("number\n");
-    }
+    if(var1->number != NULL)
+        edit_var(var2, NULL, "Number");
+    else
+        edit_var(var2, NULL, "String");
 
     return 0;
 }
 
-const struct function functions[14] = {
+const struct Function functions[14] = {
     {"add", fn_add},
     {"concatenate", fn_concatenate},
     {"delete", fn_delete},

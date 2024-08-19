@@ -377,7 +377,7 @@ void run_code(char *code) {
     }
 }
 
-void run_file(const char *filename) {
+void run_file(char *filename) {
     if(access(filename, F_OK) != 0)
         error("This file does not exist in the current path", filename, ERR_NO_SUCH_FILE, NULL);
 
@@ -570,19 +570,27 @@ int run_line(char *code) {
         if((ptr = strstr(code, functions[i].name))) {
             ptr += strlen(functions[i].name);
             
-            char *args = skip_whites(ptr);
-            if(args[0] != '(')
+            char *argstr = skip_whites(ptr);
+            if(argstr[0] != '(')
                 return ERR_SYNTAX;
-            ++args;
+            ++argstr;
             
-            char *argend = strchr(args, ')');
+            char *argend = strchr(argstr, ')');
             if(!argend)
                 return ERR_SYNTAX;
                 
             *argend = 0;
-            
-            int ret = functions[i].func(args);
+            char **argv = parse_args(argstr);
             *argend = ')';
+            if(argv == NULL)
+                return ERR_GENERIC;
+            
+            int ret = functions[i].func(argv);
+
+            for(int i = 0; argv[i] != 0; ++i)
+                free(argv[i]);
+            free(argv);
+
             return ret;
         }
     }

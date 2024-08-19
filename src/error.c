@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "error.h"
 #include "datastructures/variables.h"
@@ -8,6 +9,10 @@
 void error(const char *message, const char *extra, const int code, void *memory) {
     fflush(stdout);
 
+    char *end = strchr(extra, '\n');
+    if(end)
+        *end = 0;
+
     fprintf(stderr, "[\e[1m\e[31mERROR\e[37m\e[0m] %s\n", message);
     if(extra)
         fprintf(stderr, "        \e[31m>>>\e[0m %s \e[31m<<<\e[0m\n", extra);
@@ -15,7 +20,7 @@ void error(const char *message, const char *extra, const int code, void *memory)
     fputs("       \e[31m\e[1m<!>\e[0m ", stderr);
     switch(code) {
         case ERR_BAD_USAGE:
-            fputs("Wrong argument amount\n", stderr);
+            fputs("You need to provide a file\n", stderr);
             break;
         case ERR_NO_SUCH_FILE:
             fputs("File doesn't exist\n", stderr);
@@ -32,6 +37,8 @@ void error(const char *message, const char *extra, const int code, void *memory)
         case ERR_SYNTAX:
             fputs("Bad syntax\n", stderr);
             break;
+        case ERR_ARGC:
+            fputs("Not enough arguments\n", stderr);
         case ERR_VAR_NOT_FOUND:
             fputs("Variable not found\n", stderr);
             break;

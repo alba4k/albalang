@@ -187,3 +187,13 @@ input(a);
 
 print(${a})
 ```
+
+# 19.8.2024
+Type ora salva il risultato in una seconda variabile invece che scriverlo su stdout
+```albalang
+var a = 4;
+var b = "";
+
+type(a, b)
+print(${b})
+```
