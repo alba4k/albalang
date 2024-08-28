@@ -132,7 +132,7 @@ Variable *eval(char *expression) {
     return result;
 }
 
-void run_code(char *code) {
+int run_code(char *code) {
     char *endline = code;
     char *line = code;
 
@@ -165,6 +165,17 @@ void run_code(char *code) {
 
             char *ptr = skip_whites(line+2);
             char *start = ptr;
+            bool inverted = false;
+
+            if(strncmp(ptr, "not", 3) == 0) {
+                #ifdef DEBUG
+                debug_log("Inverting the if condition");
+                #endif // DEBUG
+
+                inverted = true;
+                
+                ptr = skip_whites(ptr+3);
+            }
 
             if(ptr[0] == '$')
                 start = strchr(ptr+1,'}');
@@ -206,11 +217,14 @@ void run_code(char *code) {
                 error("if requires a closing '}'", line, ERR_SYNTAX, code);
             }
 
-            if(*(var->number) != 0) {
+            if(inverted ? (*var->number == 0) : (*var->number != 0)) {
                 ptr[0] = 0;
-                run_code(start+1);  // recursion, meh
+                int ret = run_code(start+1);  // recursion, meh
                 ptr[0] = '}';
                 
+                if(ret != RET_OK)
+                    return ret;
+
                 ++ptr;
                 start = skip_whites(ptr);
                 
@@ -251,8 +265,11 @@ void run_code(char *code) {
                 }
                 
                 start[0] = 0;
-                run_code(ptr);  // recursion, meh
+                int ret = run_code(ptr+1);  // recursion, meh
                 start[0] = '}';
+
+                if(ret != RET_OK)
+                    return ret;
 
                 ptr = start + 1;
             }
@@ -262,7 +279,8 @@ void run_code(char *code) {
             del_var(var);
             continue;
         }
-        
+
+        // use recursive calls to run the block relative to the while statement
         if(strncmp(line, "while", 5) == 0) {
             #ifdef DEBUG
             debug_log("Found a while statement");
@@ -273,6 +291,17 @@ void run_code(char *code) {
             char *condition = skip_whites(line+5);
             char *start = condition;
             char *end;
+            bool inverted = false;
+
+            if(strncmp(condition, "not", 3) == 0) {
+                #ifdef DEBUG
+                debug_log("Inverting the if condition");
+                #endif // DEBUG
+
+                inverted = true;
+                
+                condition = skip_whites(condition+3);
+            }
 
             if(condition[0] == '$')
                 start = strchr(condition+1,'}');
@@ -311,26 +340,34 @@ void run_code(char *code) {
                     error("while requires a number", line, ERR_GENERIC, code);
                 }
                 
-                if(*(var->number) == 0) {
+                if(inverted ? (*var->number != 0) : (*var->number == 0)) {
                     del_var(var);
                     break;
                 }
 
-                run_code(start+1);
+                int ret = run_code(start+1);
                 del_var(var);
+
+                if(ret == RET_CONTINUE)
+                    continue;
+                if(ret == RET_BREAK)
+                    break;
             }
             if(var == NULL)
                 error("Not enough memory", code, ERR_OOM, NULL);
 
-            end[0] = '}';
             start[0] = '{';
+            end[0] = '}';
             
             line = end+1;
             continue;
         }
-
         // use a recursive call to run the code contained by the specified file
         if(strncmp(line, "include", 7) == 0) {
+            #ifdef DEBUG
+            debug_log("Found a file to include");
+            #endif // DEBUG
+
             char *ptr = skip_whites(line+7);
 
             if(ptr == NULL)
@@ -357,6 +394,22 @@ void run_code(char *code) {
 
             run_file(var->string);
         }
+        else if(strncmp(line, "continue", 8) == 0) {
+            #ifdef DEBUG
+            debug_log("Found a continue statement");
+            #endif // DEBUG
+
+            *endline = ';';
+            return RET_CONTINUE;
+        }
+        else if(strncmp(line, "break", 5) == 0) { 
+            #ifdef DEBUG
+            debug_log("Found a break statement");
+            #endif // DEBUG
+
+            *endline = ';';
+            return RET_BREAK;
+        }
         else {  // run the line using run_line
             int ret = run_line(line);
 
@@ -375,6 +428,8 @@ void run_code(char *code) {
         *endline = ';';
         line = endline+1;
     }
+
+    return RET_OK;
 }
 
 void run_file(char *filename) {

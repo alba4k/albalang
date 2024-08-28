@@ -197,3 +197,12 @@ var b = "";
 type(a, b)
 print(${b})
 ```
+
+# 28.8.2024
+Aggiunti break e continue per interrompere l'esecuzione all'interno di un ciclo while
+Inoltre ora è accettato un not in if e in while
+```albalang
+if not ${var} {
+    print("var è 0");
+}
+```

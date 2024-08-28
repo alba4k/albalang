@@ -17,5 +17,4 @@ Technically:
 * refactor if/else/while parsing
 
 Major stuff:
-* break/continue in loops
 * function to compare two numbers or two strings

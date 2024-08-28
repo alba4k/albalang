@@ -3,6 +3,11 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+// messages functions can return
+#define RET_OK 00
+#define RET_CONTINUE 01
+#define RET_BREAK 02
+
 // not related to albalang
 #define ERR_BAD_USAGE 50
 #define ERR_NO_SUCH_FILE 51

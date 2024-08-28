@@ -7,7 +7,7 @@
 
 Variable *eval(char *expression);
 
-void run_code(char *code);
+int run_code(char *code);
 
 void run_file(char *filename);
 
