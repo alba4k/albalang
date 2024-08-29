@@ -3,29 +3,38 @@
 #ifndef VARIABLES_H
 #define VARIABLES_H
 
-struct Variable {
-    char *name;
+typedef enum VariableType {
+    Unassigned = 0,
+    Number = 1,
+    String = 2,
+} VariableType;
 
-    double *number;
+typedef union VariableValue {
+    double number;
     char *string;
+} VariableValue;
+
+typedef struct Variable {
+    char *name;
+    VariableType type;
+
+    VariableValue value;
 
     struct Variable *prev;
     struct Variable *next;
-};
-
-typedef struct Variable Variable;
+} Variable;
 
 // heads of the linked list, defined in variables.c
 extern Variable var_head;
 
-Variable *move_var(struct Variable *head, Variable *new);
-
-Variable *create_var(char *name, double *num, char *str);
+Variable *create_var(char *name, VariableType type, VariableValue value);
 
 int del_var(struct Variable *var);
 
-Variable *edit_var(Variable *var, double *num, char *str);
+Variable *edit_var(Variable *var, VariableType new_type, VariableValue value);
 
 Variable *find_var(Variable *head, char *name);
+
+Variable *move_var(struct Variable *head, Variable *new);
 
 #endif // VARIABLES_H

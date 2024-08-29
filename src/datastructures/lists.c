@@ -9,10 +9,12 @@ List list_head = {
     NULL,
     {
         NULL,
+        Unassigned,
+        {
+            0
+        },
         NULL,
         NULL,
-        NULL,
-        NULL
     },
     NULL,
     NULL

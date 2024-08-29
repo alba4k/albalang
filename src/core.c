@@ -26,13 +26,12 @@ Variable *eval(char *expression) {
      * 4.5
      */
 
-    Variable *result = create_var(NULL, NULL, NULL);
+    VariableValue value = {0};
+    Variable *result = create_var(NULL, Unassigned, value);
 
     if(result == NULL)
         return NULL;
     
-    // this will eventually be a while loop I think
-
     expression = skip_whites(expression);
             
     if(expression == NULL)
@@ -65,7 +64,7 @@ Variable *eval(char *expression) {
 
         strcpy(result->name, var->name);
 
-        edit_var(result, var->number, var->string);
+        edit_var(result, var->type, var->value);
     }
     else if(expression[0] == '"') {
         end = strchr(expression+1, '"');
@@ -73,7 +72,8 @@ Variable *eval(char *expression) {
             return result;
         
         *end = 0;
-        edit_var(result, NULL, expression+1);
+        value.string = expression+1;
+        edit_var(result, String, value);
         *end = '"';
     }
     else if((end = strchr(expression, '['))) {
@@ -91,7 +91,7 @@ Variable *eval(char *expression) {
             *end = '[';
             return NULL;
         }
-        if(var->string != NULL || var->number == NULL) {
+        if(var->type != Number) {
             del_var(var);
             *end = '[';
             return result;
@@ -104,7 +104,7 @@ Variable *eval(char *expression) {
             return result;
         
         Variable *current = list->head.next;
-        for(int i = 0; i < (int)*var->number && current != NULL; ++i)
+        for(int i = 0; i < (int)var->value.number && current != NULL; ++i)
             current = current->next;
 
         del_var(var);
@@ -121,12 +121,12 @@ Variable *eval(char *expression) {
 
         strcpy(result->name, current->name);
 
-        edit_var(result, current->number, current->string);
+        edit_var(result, current->type, current->value);
     }
     else {
-        double num = atof(expression);
+        value.number = atof(expression);
 
-        edit_var(result, &num, NULL);
+        edit_var(result, Number, value);
     }
 
     return result;
@@ -193,14 +193,14 @@ int run_code(char *code) {
             if(var == NULL)
                 error("Not enough memory", code, ERR_OOM, NULL);
 
-            if(var->string != NULL) {
+            if(var->type == String) {
                 del_var(var);
                 ptr = strchr(line, '\n');
                 ptr[0] = 0;
                 error("if requires a number, not a string", line, ERR_WRONG_TYPE, code);
             }
 
-            if(var->number == NULL) {
+            if(var->type != Number) {
                 del_var(var);
                 ptr = strchr(line, '\n');
                 ptr[0] = 0;
@@ -217,7 +217,7 @@ int run_code(char *code) {
                 error("if requires a closing '}'", line, ERR_SYNTAX, code);
             }
 
-            if(inverted ? (*var->number == 0) : (*var->number != 0)) {
+            if(inverted ? (var->value.number == 0) : (var->value.number != 0)) {
                 ptr[0] = 0;
                 int ret = run_code(start+1);  // recursion, meh
                 ptr[0] = '}';
@@ -326,21 +326,21 @@ int run_code(char *code) {
             Variable *var;
 
             while((var = eval(condition))) {
-                if(var->string != NULL) {
+                if(var->type == String) {
                     del_var(var);
                     end = strchr(line, '\n');
                     end[0] = 0;
                     error("while requires a number, not a string", line, ERR_WRONG_TYPE, code);
                 }
 
-                if(var->number == NULL) {
+                if(var->type != Number) {
                     del_var(var);
                     end = strchr(line, '\n');
                     end[0] = 0;
                     error("while requires a number", line, ERR_GENERIC, code);
                 }
                 
-                if(inverted ? (*var->number != 0) : (*var->number == 0)) {
+                if(inverted ? (var->value.number != 0) : (var->value.number == 0)) {
                     del_var(var);
                     break;
                 }
@@ -378,12 +378,12 @@ int run_code(char *code) {
             if(var == NULL)
                 error("Not enough memory", code, ERR_OOM, NULL);
 
-            if(var->number != NULL) {
+            if(var->type == Number) {
                 del_var(var);
                 error("include requires a string, not a number", line, ERR_WRONG_TYPE, code);
             }
 
-            if(var->string == NULL) {
+            if(var->type != String) {
                 del_var(var);
                 error("include requires a string", line, ERR_GENERIC, code);
             }
@@ -392,7 +392,7 @@ int run_code(char *code) {
             debug_log("Trying to run the contents of %s via include");
             #endif // DEBUG
 
-            run_file(var->string);
+            run_file(var->value.string);
         }
         else if(strncmp(line, "continue", 8) == 0) {
             #ifdef DEBUG
@@ -506,7 +506,7 @@ int run_line(char *code) {
         // read ` 80.9`
 
         // they are both NULL
-        if(value->number == NULL && value->string == NULL) {
+        if(value->type == Unassigned) {
             if(ptr2 != NULL)
                 *ptr2 = cache;
             return ERR_SYNTAX;
@@ -514,7 +514,7 @@ int run_line(char *code) {
 
         Variable *var = find_var(&var_head, name);
         if(var == NULL) {
-            Variable *new = create_var(name, value->number, value->string);
+            Variable *new = create_var(name, value->type, value->value);
 
             if(new == NULL)
                 return ERR_OOM;
@@ -522,7 +522,7 @@ int run_line(char *code) {
             move_var(&var_head, new);
         }
         else
-            edit_var(var, value->number, value->string);
+            edit_var(var, value->type, value->value);
 
         del_var(value);
 
@@ -576,7 +576,7 @@ int run_line(char *code) {
             Variable *list_var = find_var(&(list->head), ptr2);
 
             if(list_var != NULL) {
-                edit_var(list_var, var->number, var->string);
+                edit_var(list_var, var->type, var->value);
 
                 del_var(var);
             }
@@ -607,7 +607,7 @@ int run_line(char *code) {
                 return ERR_VAR_NOT_FOUND;
             Variable *var = find_var(&var_head, ptr2);
             if(var != NULL) {
-                edit_var(var, list_var->number, list_var->string);
+                edit_var(var, list_var->type, list_var->value);
 
                 del_var(list_var);
             }
