@@ -8,6 +8,6 @@ struct Function {
     int (*func)(char **);
 };
 
-extern const struct Function functions[14];
+extern const struct Function functions[15];
 
 #endif // STDLIB_H

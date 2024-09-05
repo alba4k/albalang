@@ -84,16 +84,18 @@ char **parse_args(char *str) {
         return NULL;
     }
 
+    char *ptr = buf;
     char *start = buf;
     char *end;
     do {
-        end = strchr(start, ',');
-
+        end = strchr(ptr, ',');
+        
         if(end != NULL) {
-            if(is_in_string(buf, end) == true) {
-                start = end+1;
+            ptr = end + 1;
+
+            if(is_in_string(buf, end) == true)
                 continue;
-            }
+
             *end = 0;
         }
 
@@ -111,7 +113,7 @@ char **parse_args(char *str) {
             free(argv);
             return NULL;
         }
-        start = end+1;
+        start = ptr;
     }
     while(end != NULL);
 

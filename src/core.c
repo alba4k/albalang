@@ -238,6 +238,7 @@ int run_code(char *code) {
                             ptr[0] = 0;
                             error("else requires a starting '{' and a closing '}'", line, ERR_SYNTAX, code);
                         }
+                        ++ptr;
                     }
             }
             else {
@@ -622,8 +623,8 @@ int run_line(char *code) {
 
     // functions belonging to stdlib
     for(size_t i = 0; i < sizeof(functions)/sizeof(functions[0]); i++) {
-        if((ptr = strstr(code, functions[i].name))) {
-            ptr += strlen(functions[i].name);
+        if(strncmp(code, functions[i].name, strlen(functions[i].name)) == 0) {
+            ptr = code + strlen(functions[i].name);
             
             char *argstr = skip_whites(ptr);
             if(argstr[0] != '(')
@@ -631,7 +632,7 @@ int run_line(char *code) {
             ++argstr;
             
             char *argend = strchr(argstr, ')');
-            if(!argend)
+            if(argend == NULL)
                 return ERR_SYNTAX;
                 
             *argend = 0;

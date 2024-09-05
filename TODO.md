@@ -17,4 +17,4 @@ Technically:
 * refactor if/else/while parsing
 
 Major stuff:
-* function to compare two numbers or two strings
+* done?

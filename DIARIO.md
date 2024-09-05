@@ -206,3 +206,18 @@ if not ${var} {
     print("var è 0");
 }
 ```
+
+# 5.9.2024
+Migliorata la gestione di sintassi errate e aggiunta una funzione per confrontare due valori
+```albalang
+var a = 7;
+var uguali = 1;
+
+compare(${a}, 7, uguali);
+
+if ${uguali} {
+    print("I valori sono uguali");
+} else {
+    print("I valori sono diversi");
+}
+```

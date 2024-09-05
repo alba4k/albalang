@@ -74,6 +74,80 @@ int fn_add(char **argv) {
     return combine(argv, 0);
 }
 
+// compare values 1 and 2, change the third accordingly
+int fn_compare(char **argv) {
+    #ifdef DEBUG
+    debug_log("Called compare()");
+    #endif // DEBUG
+    
+
+    if(argv[0] == NULL)
+        return ERR_ARGC;
+    if(argv[1] == NULL)
+        return ERR_ARGC;
+    if(argv[2] == NULL)
+        return ERR_ARGC;
+    
+    Variable *var1 = eval(argv[0]);
+    if(var1 == NULL)
+        return ERR_OOM;
+    if(var1->type == Unassigned) {
+        del_var(var1);
+        return ERR_GENERIC;
+    }
+    
+    Variable *var2 = eval(argv[1]);
+    if(var2 == NULL) {
+        del_var(var1);
+        return ERR_OOM;
+    }
+    if(var2->type == Unassigned) {
+        del_var(var1);
+        del_var(var2);
+        return ERR_GENERIC;
+    }
+
+    Variable *var3 = find_var(&var_head, argv[2]);
+    if(var3 == NULL) {
+        del_var(var1);
+        del_var(var2);
+        return ERR_VAR_NOT_FOUND;
+    }
+    
+    if(var1->type != var2->type) {
+        del_var(var1);
+        del_var(var2);
+        return ERR_WRONG_TYPE;
+    }
+    
+    VariableValue result;
+
+    if(var1->type == Number) {
+        if(var1->value.number == var2->value.number)
+            result.number = 1;
+        else
+            result.number = 0;
+    }
+    else if(var1->type == String) {
+        if(strcmp(var1->value.string, var2->value.string) == 0)
+            result.number = 1;
+        else
+            result.number = 0;
+    }
+    else {
+        del_var(var1);
+        del_var(var2);
+        return ERR_GENERIC;
+    }
+        
+    del_var(var1);
+    del_var(var2);
+    
+    edit_var(var3, Number, result);
+
+    return RET_OK;
+}
+
 // concatenate the contents of var2/end with var1
 int fn_concatenate(char **argv) {
     #ifdef DEBUG
@@ -384,8 +458,9 @@ int fn_type(char **argv) {
     return RET_OK;
 }
 
-const struct Function functions[14] = {
+const struct Function functions[15] = {
     {"add", fn_add},
+    {"compare", fn_compare},
     {"concatenate", fn_concatenate},
     {"delete", fn_delete},
     {"divide", fn_divide},

@@ -48,9 +48,8 @@ Variable *create_var(char *name, VariableType type, VariableValue value) {
 
     new->type = type;
 
-    if(type == Number) {
+    if(type == Number)
         new->value.number = value.number;
-    }
     else if(type == String) {
         new->value.string = malloc(strlen(value.string)+1);
 

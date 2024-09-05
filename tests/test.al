@@ -1,12 +1,22 @@
+var comparison_result = 1;
+var comparison_result_2 = 27;
 
-var a = 1000;
+var variable = "ciao";
+var number = 25.5;
 
-while ${a} {
-    subtract(a, 1);
+compare(${variable}, "ciao", comparison_result);
+compare(${number}, 25.3, comparison_result_2);
 
-    var b = ${a};
-    sqrt(b);
+if not ${comparison_result} {
+    print("CIAO");
+}
+else {
+    print("ciao");
+}
 
-    print(${a});
-    print(${b});
+if not ${comparison_result_2} {
+    print("BOH");
+}
+else {
+    print("boh");
 }
