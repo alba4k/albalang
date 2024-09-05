@@ -24,6 +24,7 @@ Variable *eval(char *expression) {
      * ${var}
      * "text"
      * 4.5
+     * list[${num}]
      */
 
     VariableValue value = {0};
@@ -45,7 +46,8 @@ Variable *eval(char *expression) {
         
         end = strchr(expression+2, '}');
         if(end == NULL)
-            return NULL;
+            return result;
+            
         *end = 0;
 
         Variable *var = find_var(&var_head, expression+2);
@@ -138,8 +140,7 @@ int run_code(char *code) {
 
     while((endline = strchr(line, ';')) != NULL) {
         if(endline > code) {
-            // \; should not end a line
-            if(is_in_string(code, endline) == true) {
+            while(is_in_string(code, endline) == true) {
                 endline = strchr(endline+1, ';');
 
                 if(endline == NULL)
@@ -222,8 +223,10 @@ int run_code(char *code) {
                 int ret = run_code(start+1);  // recursion, meh
                 ptr[0] = '}';
                 
-                if(ret != RET_OK)
+                if(ret != RET_OK) {
+                    del_var(var);
                     return ret;
+                }
 
                 ++ptr;
                 start = skip_whites(ptr);
@@ -383,7 +386,6 @@ int run_code(char *code) {
                 del_var(var);
                 error("include requires a string, not a number", line, ERR_WRONG_TYPE, code);
             }
-
             if(var->type != String) {
                 del_var(var);
                 error("include requires a string", line, ERR_GENERIC, code);
@@ -394,6 +396,8 @@ int run_code(char *code) {
             #endif // DEBUG
 
             run_file(var->value.string);
+
+            del_var(var);
         }
         else if(strncmp(line, "continue", 8) == 0) {
             #ifdef DEBUG

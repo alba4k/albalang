@@ -5,7 +5,7 @@ OBJ := obj/core.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o ob
 
 ifeq ($(DEBUG),1)
 	OBJ := obj/core.o obj/debug.o obj/error.o obj/lists.o obj/main.o obj/stdlib.o obj/utils.o obj/variables.o
-	CFLAGS := -Wall -Wextra -O2 -DDEBUG
+	CFLAGS := -Wall -Wextra -O2 -DDEBUG -g
 endif
 
 build/albalang: $(OBJ)

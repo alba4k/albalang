@@ -17,7 +17,6 @@ while ${a} {
     subtract(a, 1);
     print(${i});
 
-
     if not ${check} {
         break;
     }

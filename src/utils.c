@@ -84,21 +84,18 @@ char **parse_args(char *str) {
         return NULL;
     }
 
-    char *ptr = buf;
     char *start = buf;
     char *end;
     do {
-        end = strchr(ptr, ',');
-        
-        if(end != NULL) {
-            ptr = end + 1;
-
-            if(is_in_string(buf, end) == true)
-                continue;
-
-            *end = 0;
+        end = start;
+        while((end = strchr(end, ','))) {
+            if(is_in_string(buf, end) == false) {
+                *end = 0;
+                break;
+            }
+            ++end;
         }
-
+        
         ++argc;
 
         argv = realloc(argv, (argc+1)*sizeof(char*));
@@ -110,10 +107,12 @@ char **parse_args(char *str) {
         argv[argc-1] = clean_string(start);
         if(argv[argc-1] == NULL) {
             free(buf);
+            for(int i = 0; i < argc-1; ++i)
+                free(argv[i]);
             free(argv);
             return NULL;
         }
-        start = ptr;
+        start = end+1;
     }
     while(end != NULL);
 

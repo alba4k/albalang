@@ -32,8 +32,10 @@ int combine(char **argv, const int mode) {
     Variable *var2 = eval(argv[1]);
     if(var2 == NULL)
         return ERR_OOM;
-    if(var2->type != Number)
+    if(var2->type != Number) {
+        del_var(var2);
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
+    }
 
     double value = var2->value.number;
     VariableValue result;
@@ -80,7 +82,6 @@ int fn_compare(char **argv) {
     debug_log("Called compare()");
     #endif // DEBUG
     
-
     if(argv[0] == NULL)
         return ERR_ARGC;
     if(argv[1] == NULL)
@@ -168,14 +169,18 @@ int fn_concatenate(char **argv) {
     Variable *var2 = eval(argv[1]);
     if(var2 == NULL)
         return ERR_OOM;
-    if(var2->type != String)
+    if(var2->type != String) {
+        del_var(var2);
         return ERR_GENERIC; // could be a variable not found, wrong variable type, or syntax error
+    }
 
     VariableValue result;
     result.string = malloc(strlen(var1->value.string) + strlen(var2->value.string) + 1);
 
-    if(result.string == NULL)
+    if(result.string == NULL) {
+        del_var(var2);
         return ERR_OOM;
+    }
 
     strcpy(result.string, var1->value.string);
     strcat(result.string, var2->value.string);
@@ -305,6 +310,7 @@ int fn_print(char **argv) {
     
     if(argv[0] == NULL)
         return ERR_ARGC;
+    debug_log(":%s:", argv[0]);
 
     Variable *var = eval(argv[0]);
     if(var == NULL)
@@ -323,7 +329,8 @@ int fn_print(char **argv) {
         debug_log("Enforcing newline = 1 because of logging");
         newline = 1;
     }
-    printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
+    if(var->type != Unassigned)
+        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
     #endif // DEBUG
 
     if(var->type == Number)
@@ -364,8 +371,10 @@ int fn_shell(char **argv) {
     
     if(fork() != 0)
         execlp("/bin/sh", "sh", "-c", var->value.string, NULL);
-    
+
     wait(0);
+
+    del_var(var);
 
     return RET_OK;
 }

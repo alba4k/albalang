@@ -25,12 +25,19 @@ List list_head = {
 #endif // DEBUG
 
 List *add_list(struct List *head, List *new) {
-    if(head == NULL || new == NULL)
+    if(head == NULL || new == NULL) {
+        del_list(new);
         return NULL;
+    }
 
     #ifdef DEBUG
         debug_log("Adding list %s to stack %s", new->name, (head->name == NULL) ? "\e[1mdefault\e[0m" : head->name);
     #endif // DEBUG
+
+    if(new->prev != NULL)
+        new->prev->next = new->next;
+    if(new->next != NULL)
+        new->next->prev = new->prev;
 
     // reach the end of the linked list
     List *last = head;
@@ -58,23 +65,16 @@ List *create_list(char *name) {
     #endif // DEBUG
 
     if(name != NULL) {
-        new->name = malloc(sizeof(name)+1);
+        new->name = malloc(strlen(name)+1);
     
         if(new->name == NULL) {
             free(new);
             return NULL;
         }
 
-        new->head.name = malloc(sizeof(name)+1);
-
-        if(new->name == NULL) {
-            free(new->name);
-            free(new);
-            return NULL;
-        }
+        new->head.name = new->name;
 
         strcpy(new->name, name);
-        strcpy(new->head.name, name);
     }
 
     return new;
@@ -87,7 +87,6 @@ int del_list(struct List *list) {
     #ifdef DEBUG
     debug_log("Deleting list %s (%p, prev: %p; next: %p)", list->name, list, list->prev, list->next);
     #endif // DEBUG
-
 
     if(list->prev != NULL)
         list->prev->next = list->next;

@@ -36,7 +36,7 @@ Variable *create_var(char *name, VariableType type, VariableValue value) {
     #endif // DEBUG
 
     if(name != NULL) {
-        new->name = malloc(sizeof(name)+1);
+        new->name = malloc(strlen(name)+1);
 
         if(new->name == NULL) {
             free(new);

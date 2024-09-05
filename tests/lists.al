@@ -14,3 +14,5 @@ list a << c;
 # a includes b and c
 
 print( a [ 1 ] );
+
+delete(a);
