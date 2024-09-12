@@ -8,7 +8,7 @@
 
 - [x] Branching
 - [x] While loops
-(- [ ] For loops) 
+(- [ ] For loops)
 
 (- [ ] Functions)
 
@@ -17,4 +17,5 @@ Technically:
 * refactor if/else/while parsing
 
 Major stuff:
+* variable names as strings
 * done?

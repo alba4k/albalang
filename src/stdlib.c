@@ -310,7 +310,6 @@ int fn_print(char **argv) {
     
     if(argv[0] == NULL)
         return ERR_ARGC;
-    debug_log(":%s:", argv[0]);
 
     Variable *var = eval(argv[0]);
     if(var == NULL)

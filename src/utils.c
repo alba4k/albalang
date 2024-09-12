@@ -23,7 +23,7 @@ char *clean_string(char *str) {
     strcpy(start, str);
 
     char *end = start + strlen(start);
-    while(end[-1] == ' ' || end[-1] == '\n')
+    while(end[-1] == ' ' || end[-1] == '\n' || end[-1] == '\t')
         --end;
 
     *end = 0;
@@ -130,7 +130,7 @@ char *skip_whites(char *ptr) {
         return NULL;
 
     while(*ptr) {
-        if(*ptr != ' ' && *ptr != '\n')
+        if(*ptr != ' ' && *ptr != '\n' && *ptr != '\t')
             return ptr;
         ++ptr;
     }
@@ -144,7 +144,7 @@ char *skip_full(char *ptr) {
         return NULL;
 
     while(*ptr) {
-        if(*ptr == ' ' || *ptr == '\n')
+        if(*ptr == ' ' || *ptr == '\n' || *ptr == '\t')
             return ptr;
         ++ptr;
     }
