@@ -115,14 +115,18 @@ int fn_compare(char **argv) {
         return ERR_VAR_NOT_FOUND;
     }
     
+    VariableValue result;
+
     if(var1->type != var2->type) {
         del_var(var1);
         del_var(var2);
-        return ERR_WRONG_TYPE;
+        
+        result.number = 0;
+        edit_var(var3, Number, result);
+
+        return RET_OK;
     }
     
-    VariableValue result;
-
     if(var1->type == Number) {
         if(var1->value.number == var2->value.number)
             result.number = 1;
