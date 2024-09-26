@@ -1,9 +1,11 @@
 var v = 4;
-
+;;;;;
 power(v, 7);
+
+#;abc;
 
 print (  
     "Hello World!" 
     )       ;
 
-add(w, ${v});
+ab c (w, ${v});

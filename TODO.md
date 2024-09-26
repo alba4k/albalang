@@ -18,4 +18,5 @@ Technically:
 
 Major stuff:
 * variable names as strings
+* r/w files
 * done?

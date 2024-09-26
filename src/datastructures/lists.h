@@ -16,8 +16,7 @@
  * You cannot add a list to another list.
  */
 
-struct List
-{
+struct List {
     char *name;
 
     Variable head;
