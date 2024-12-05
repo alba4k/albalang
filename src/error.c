@@ -9,18 +9,19 @@
 void error(const char *message, const char *extra, const int code, void *memory) {
     fflush(stdout);
 
-    char *end = strchr(extra, '\n');
-    if(end)
-        *end = 0;
-
     fprintf(stderr, "[\e[1m\e[31mERROR\e[37m\e[0m] %s\n", message);
-    if(extra)
+    if(extra != NULL) {
+        char *end = strchr(extra, '\n');
+            if(end)
+                *end = 0;
+
         fprintf(stderr, "        \e[31m>>>\e[0m %s \e[31m<<<\e[0m\n", extra);
+    }
 
     fputs("       \e[31m\e[1m<!>\e[0m ", stderr);
     switch(code) {
         case ERR_BAD_USAGE:
-            fputs("You need to provide a file\n", stderr);
+            fputs("No file provided\n", stderr);
             break;
         case ERR_NO_SUCH_FILE:
             fputs("File doesn't exist\n", stderr);
@@ -46,7 +47,7 @@ void error(const char *message, const char *extra, const int code, void *memory)
             fputs("Wrong variable type\n", stderr);
             break;
         case ERR_LIST_NOT_FOUND:
-            fputs("That list couldn't be found\n", stderr);
+            fputs("List not found\n", stderr);
             break;
         default:
             fputs("Unknown error\n", stderr);

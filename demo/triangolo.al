@@ -1,10 +1,9 @@
 var MAX  = 7;
-var n_righe = 0;
-add(n_righe, ${MAX});
+var n_righe = ${MAX};
 
 while ${n_righe} {
-    var i = 1;
-    add(i, ${MAX});
+    var i = ${MAX};
+    subtract(n_righe, 1);
     subtract(i, ${n_righe});
 
     while ${i} {
@@ -14,6 +13,5 @@ while ${n_righe} {
     }
 
     print("");
-    
-    subtract(n_righe, 1);
 }
+
