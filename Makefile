@@ -9,6 +9,7 @@ ifeq ($(DEBUG),1)
 endif
 
 build/albalang: $(OBJ)
+	mkdir build
 	$(CC) $(CFLAGS) $(OBJ) -o build/albalang -lm
 
 obj/core.o: src/core.c
