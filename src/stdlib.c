@@ -450,11 +450,13 @@ int fn_type(char **argv) {
     if(argv[1] == NULL)
         return ERR_ARGC;
         
-    Variable *var1 = find_var(&var_head, argv[0]);
     Variable *var2 = find_var(&var_head, argv[1]);
-
-    if(var1 == NULL || var2 == NULL)
+    if(var2 == NULL)
         return ERR_VAR_NOT_FOUND;
+    
+    Variable *var1 = eval(argv[0]);
+    if(var1 == NULL)
+        return ERR_OOM;
 
     VariableValue result;
 

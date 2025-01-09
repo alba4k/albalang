@@ -8,4 +8,5 @@ list a << c;list a >> c;print(${c});list a << c;
 
 # a includes b and c
 
-print( a[1] );delete(a);
+print( a[1] );
+delete(a);
