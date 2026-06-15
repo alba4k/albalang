@@ -3,12 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "debug.h"
 #include "stdlib.h"
 #include "utils.h"
-
-#ifdef DEBUG
-#include "debug.h"
-#endif // DEBUG
 
 // return a section of the heap containing a cleaner version of str
 char *clean_string(char *str) {
@@ -153,9 +150,7 @@ char *skip_full(char *ptr) {
 }
 
 void uncomment(char *text) {
-    #ifdef DEBUG
-    debug_log("Removing comments...");
-    #endif // DEBUG
+    if(debug) debug_log("Removing comments...");
 
     char *ptr = text;
     while((ptr = strchr(ptr, '#'))) {

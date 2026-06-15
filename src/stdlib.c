@@ -6,15 +6,12 @@
 #include <unistd.h>
 
 #include "core.h"
+#include "debug.h"
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"
 #include "datastructures/variables.h"
 #include "datastructures/lists.h"
-
-#ifdef DEBUG
-#include "debug.h"
-#endif // DEBUG
 
 // this function is called by most binary operators
 int combine(char **argv, const int mode) {
@@ -69,18 +66,14 @@ int combine(char **argv, const int mode) {
 
 // add the contents of var2/end to var1
 int fn_add(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called add()");
-    #endif // DEBUG
+    if(debug) debug_log("Called add()");
     
     return combine(argv, 0);
 }
 
 // compare values 1 and 2, change the third accordingly
 int fn_compare(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called compare()");
-    #endif // DEBUG
+    if(debug) debug_log("Called compare()");
     
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -155,9 +148,7 @@ int fn_compare(char **argv) {
 
 // concatenate the contents of var2/end with var1
 int fn_concatenate(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called concatenate()");
-    #endif // DEBUG
+    if(debug) debug_log("Called concatenate()");
     
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -199,9 +190,7 @@ int fn_concatenate(char **argv) {
 
 // delete a variable from memory
 int fn_delete(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called delete()");
-    #endif // DEBUG
+    if(debug) debug_log("Called delete()");
 
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -224,18 +213,14 @@ int fn_delete(char **argv) {
 
 // divide the contents of var2/end by var1
 int fn_divide(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called divide()");
-    #endif // DEBUG
+    if(debug) debug_log("Called divide()");
     
     return combine(argv, 3);
 }
 
 // read a maximum of 0x4000 characters from stdin
 int fn_input(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called input()");
-    #endif // DEBUG
+    if(debug) debug_log("Called input()");
     
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -248,9 +233,7 @@ int fn_input(char **argv) {
     VariableValue input;
     input.string = malloc(MAX);
 
-    #ifdef DEBUG
-    printf("[\e[1m\e[36mINPUT\e[37m\e[0m] ");
-    #endif // DEBUG
+    if(debug) printf("[\e[1m\e[36mINPUT\e[37m\e[0m] ");
 
     fgets(input.string, MAX, stdin);
 
@@ -267,18 +250,14 @@ int fn_input(char **argv) {
 
 // add the contents of var2/end to var1
 int fn_multiply(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called multiply()");
-    #endif // DEBUG
+    if(debug) debug_log("Called multiply()");
     
     return combine(argv, 2);
 }
 
 // cast str to num
 int fn_num(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called num()");
-    #endif // DEBUG
+    if(debug) debug_log("Called num()");
 
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -299,18 +278,14 @@ int fn_num(char **argv) {
 
 // raise var1 to the var2/end -th power
 int fn_power(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called power()");
-    #endif // DEBUG
+    if(debug) debug_log("Called power()");
     
     return combine(argv, 4);
 }
 
 // print some text or a variable
 int fn_print(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called print()");
-    #endif // DEBUG
+    if(debug) debug_log("Called print()");
     
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -327,14 +302,14 @@ int fn_print(char **argv) {
         return ERR_SYNTAX;
     }
 
-    #ifdef DEBUG
-    if(newline == 0) {
-        debug_log("Enforcing newline = 1 because of logging");
-        newline = 1;
+    if(debug) {
+        if(newline == 0) {
+            debug_log("Enforcing newline = 1 because of logging");
+            newline = 1;
+        }
+        if(var->type != Unassigned)
+            printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
     }
-    if(var->type != Unassigned)
-        printf("[\e[1m\e[32mPRINT\e[37m\e[0m] ");
-    #endif // DEBUG
 
     if(var->type == Number)
         printf("%f%s", var->value.number, newline ? "\n" : "");
@@ -352,9 +327,7 @@ int fn_print(char **argv) {
 
 // execute cmd in a shell
 int fn_shell(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called print()");
-    #endif // DEBUG
+    if(debug) debug_log("Called print()");
 
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -384,9 +357,7 @@ int fn_shell(char **argv) {
 
 // cast num to str
 int fn_str(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called num()");
-    #endif // DEBUG
+    if(debug) debug_log("Called num()");
 
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -410,9 +381,7 @@ int fn_str(char **argv) {
 
 // take the square root of the variable
 int fn_sqrt(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called sqrt()");
-    #endif // DEBUG
+    if(debug) debug_log("Called sqrt()");
     
     if(argv[0] == NULL)
         return ERR_ARGC;
@@ -432,18 +401,14 @@ int fn_sqrt(char **argv) {
 
 // add the contents of var2/end to var1
 int fn_subtract(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called subtract()");
-    #endif // DEBUG
+    if(debug) debug_log("Called subtract()");
     
     return combine(argv, 1);
 }
 
 // print the type of var
 int fn_type(char **argv) {
-    #ifdef DEBUG
-    debug_log("Called type()");
-    #endif // DEBUG
+    if(debug) debug_log("Called type()");
 
     if(argv[0] == NULL)
         return ERR_ARGC;

@@ -4,21 +4,15 @@
 #include <unistd.h>
 
 #include "core.h"
+#include "debug.h"
 #include "error.h"
 #include "stdlib.h"
 #include "utils.h"
 #include "datastructures/lists.h"
 #include "datastructures/variables.h"
 
-#ifdef DEBUG
-#include "debug.h"
-#endif // DEBUG
 
 Variable *eval(char *expression) {
-    #ifdef DEBUG
-    debug_log("Trying to evaluate `%s`", expression);
-    #endif // DEBUG
-
     /* 
      * This can currently parse:
      * ${var}
@@ -34,7 +28,9 @@ Variable *eval(char *expression) {
         return NULL;
     
     expression = skip_whites(expression);
-            
+
+    if(debug) debug_log("Trying to evaluate `%s`", expression);
+    
     if(expression == NULL)
         return result;
 
@@ -158,9 +154,7 @@ int run_code(char *code) {
 
         // use a recursive call to run the blocks relative to the if/else statement
         if(strncmp(line, "if", 2) == 0) {
-            #ifdef DEBUG
-            debug_log("Found an if statement");
-            #endif // DEBUG
+            if(debug) debug_log("Found an if statement");
 
             *endline = ';';
 
@@ -169,9 +163,7 @@ int run_code(char *code) {
             bool inverted = false;
 
             if(strncmp(ptr, "not", 3) == 0) {
-                #ifdef DEBUG
-                debug_log("Inverting the if condition");
-                #endif // DEBUG
+                if(debug) debug_log("Inverting the if condition");
 
                 inverted = true;
                 
@@ -254,9 +246,7 @@ int run_code(char *code) {
                     goto end;
                 start += 4;
 
-                #ifdef DEBUG
-                debug_log("Found an else statement");
-                #endif // DEBUG
+                if(debug) debug_log("Found an else statement");
 
                 ptr = skip_whites(start);
 
@@ -286,9 +276,7 @@ int run_code(char *code) {
 
         // use recursive calls to run the block relative to the while statement
         if(strncmp(line, "while", 5) == 0) {
-            #ifdef DEBUG
-            debug_log("Found a while statement");
-            #endif // DEBUG
+            if(debug) debug_log("Found a while statement");
 
             *endline = ';';
 
@@ -298,9 +286,7 @@ int run_code(char *code) {
             bool inverted = false;
 
             if(strncmp(condition, "not", 3) == 0) {
-                #ifdef DEBUG
-                debug_log("Inverting the if condition");
-                #endif // DEBUG
+                if(debug) debug_log("Inverting the if condition");
 
                 inverted = true;
                 
@@ -368,9 +354,7 @@ int run_code(char *code) {
         }
         // use a recursive call to run the code contained by the specified file
         if(strncmp(line, "include", 7) == 0) {
-            #ifdef DEBUG
-            debug_log("Found a file to include");
-            #endif // DEBUG
+            if(debug) debug_log("Found a file to include");
 
             char *ptr = skip_whites(line+7);
 
@@ -391,26 +375,20 @@ int run_code(char *code) {
                 error("include requires a string", line, ERR_GENERIC, code);
             }
 
-            #ifdef DEBUG
-            debug_log("Trying to run the contents of %s via include");
-            #endif // DEBUG
+            if(debug) debug_log("Trying to run the contents of %s via include");
 
             run_file(var->value.string);
 
             del_var(var);
         }
         else if(strncmp(line, "continue", 8) == 0) {
-            #ifdef DEBUG
-            debug_log("Found a continue statement");
-            #endif // DEBUG
+            if(debug) debug_log("Found a continue statement");
 
             *endline = ';';
             return RET_CONTINUE;
         }
         else if(strncmp(line, "break", 5) == 0) { 
-            #ifdef DEBUG
-            debug_log("Found a break statement");
-            #endif // DEBUG
+            if(debug) debug_log("Found a break statement");
 
             *endline = ';';
             return RET_BREAK;
@@ -470,9 +448,7 @@ int run_line(char *code) {
     if(code == NULL)
         return 0;
 
-    #ifdef DEBUG
-    debug_log("Running a new line");
-    #endif // DEBUG
+    if(debug) debug_log("Running a new line");
 
     char *ptr;
 

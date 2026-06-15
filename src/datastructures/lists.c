@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../debug.h"
 #include "lists.h"
 #include "variables.h"
 #include "../utils.h" // Don't really like relying on this bus ok (just for find_var)
@@ -20,19 +21,13 @@ List list_head = {
     NULL
 };
 
-#ifdef DEBUG
-#include "../debug.h"
-#endif // DEBUG
-
 List *add_list(struct List *head, List *new) {
     if(head == NULL || new == NULL) {
         del_list(new);
         return NULL;
     }
 
-    #ifdef DEBUG
-        debug_log("Adding list %s to stack %s", new->name, (head->name == NULL) ? "\e[1mdefault\e[0m" : head->name);
-    #endif // DEBUG
+    if(debug) debug_log("Adding list %s to stack %s", new->name, (head->name == NULL) ? "\e[1mdefault\e[0m" : head->name);
 
     if(new->prev != NULL)
         new->prev->next = new->next;
@@ -60,9 +55,7 @@ List *create_list(char *name) {
 
     memset(new, 0, sizeof(List));
 
-    #ifdef DEBUG
-        debug_log("Creating list %s (%p)", name, new);
-    #endif // DEBUG
+    if(debug) debug_log("Creating list %s (%p)", name, new);
 
     if(name != NULL) {
         new->name = malloc(strlen(name)+1);
@@ -84,9 +77,7 @@ int del_list(struct List *list) {
     if(list == NULL)
         return -1;
 
-    #ifdef DEBUG
-    debug_log("Deleting list %s (%p, prev: %p; next: %p)", list->name, list, list->prev, list->next);
-    #endif // DEBUG
+    if(debug) debug_log("Deleting list %s (%p, prev: %p; next: %p)", list->name, list, list->prev, list->next);
 
     if(list->prev != NULL)
         list->prev->next = list->next;

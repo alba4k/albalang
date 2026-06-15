@@ -1,16 +1,26 @@
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "core.h"
+#include "debug.h"
 #include "error.h"
 #include "datastructures/variables.h"
 #include "datastructures/lists.h"
 
-int main(int argc, char **argv) {
-    // guards against incorrect usage
-    if(argc != 2)
-        error("Usage: albalang <file>.al.", NULL, ERR_BAD_USAGE, NULL);
+bool debug = false;
 
-    run_file(argv[1]);
+int main(int argc, char **argv) {
+    // TODO: Proper argument parsing
+    if(argc >= 2)
+        if(strcmp(argv[1], "--debug") == 0)
+            debug = true;
+
+    // guards against incorrect usage
+    if(argc != (debug ? 3 : 2))
+        error("Usage: albalang [--debug] <file>.al.", NULL, ERR_BAD_USAGE, NULL);
+
+    run_file(argv[debug ? 2 : 1]);
 
     // clear variable linked list
     while(var_head.next != NULL)

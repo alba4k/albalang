@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "variables.h"
+#include "../debug.h"
 #include "../utils.h" // Don't really like relying on this bus ok (just for find_var)
+#include "variables.h"
 
 Variable var_head = {
     NULL,
@@ -14,10 +15,6 @@ Variable var_head = {
     NULL,
 };
 
-#ifdef DEBUG
-#include "../debug.h"
-#endif // DEBUG
-
 Variable *create_var(char *name, VariableType type, VariableValue value) {
     Variable *new = malloc(sizeof(Variable));
 
@@ -26,14 +23,14 @@ Variable *create_var(char *name, VariableType type, VariableValue value) {
 
     memset(new, 0, sizeof(Variable));
 
-    #ifdef DEBUG
-    if(type == Number)
-        debug_log("Creating variable %s (%p, num: %f)", name, new, value.number);
-    else if(type == String)
-        debug_log("Creating variable %s (%p, str: %s)", name, new, value.string);
-    else
-        debug_log("Creating variable %s (%p, unassigned type)", name, new);
-    #endif // DEBUG
+    if(debug) {
+        if(type == Number)
+            debug_log("Creating variable %s (%p, num: %f)", name, new, value.number);
+        else if(type == String)
+            debug_log("Creating variable %s (%p, str: %s)", name, new, value.string);
+        else
+            debug_log("Creating variable %s (%p, unassigned type)", name, new);
+    }
 
     if(name != NULL) {
         new->name = malloc(strlen(name)+1);
@@ -68,10 +65,7 @@ int del_var(Variable *var) {
     if(var == NULL)
         return -1;
 
-    #ifdef DEBUG
-    debug_log("Deleting variable %s (%p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
-    #endif // DEBUG
-
+    if(debug) debug_log("Deleting variable %s (%p, prev: %p; next: %p)", var->name, var, var->prev, var->next);
 
     if(var->prev != NULL)
         var->prev->next = var->next;
@@ -89,21 +83,20 @@ int del_var(Variable *var) {
 Variable *edit_var(Variable *var, VariableType new_type, VariableValue value) {
     if(var == NULL)
         return NULL;
-
-    #ifdef DEBUG
-    if(var->type == String && new_type == String)
-        debug_log("Changing variable %s (%p, %s -> %s)", var->name, var, var->value.string, value.string);
-    else if(var->type == Number && new_type == String)
-        debug_log("Changing variable %s (%p, %f -> %s)", var->name, var, var->value.number, value.string);
-    else if(var->type == String && new_type == Number)
-        debug_log("Changing variable %s (%p, %s -> %f)", var->name, var, var->value.string, value.number);
-    else if(var->type == Number && new_type == Number)
-        debug_log("Changing variable %s (%p, %f -> %f)", var->name, var, var->value.number, value.number);
-    else if(var->type == Unassigned && new_type == Number)
-        debug_log("Changing variable %s (%p, [] -> %f)", var->name, var, value.number);
-    else if(var->type == Unassigned && new_type == String)
-        debug_log("Changing variable %s (%p, [] -> %s)", var->name, var, value.string);
-    #endif // DEBUG
+    if(debug) {
+        if(var->type == String && new_type == String)
+            debug_log("Changing variable %s (%p, %s -> %s)", var->name, var, var->value.string, value.string);
+        else if(var->type == Number && new_type == String)
+            debug_log("Changing variable %s (%p, %f -> %s)", var->name, var, var->value.number, value.string);
+        else if(var->type == String && new_type == Number)
+            debug_log("Changing variable %s (%p, %s -> %f)", var->name, var, var->value.string, value.number);
+        else if(var->type == Number && new_type == Number)
+            debug_log("Changing variable %s (%p, %f -> %f)", var->name, var, var->value.number, value.number);
+        else if(var->type == Unassigned && new_type == Number)
+            debug_log("Changing variable %s (%p, [] -> %f)", var->name, var, value.number);
+        else if(var->type == Unassigned && new_type == String)
+            debug_log("Changing variable %s (%p, [] -> %s)", var->name, var, value.string);
+    }
 
     if(new_type == Number) {
         if(var->type == String)
@@ -162,9 +155,7 @@ Variable *move_var(Variable *head, Variable *new) {
     if(head == NULL || new == NULL)
         return NULL;
 
-    #ifdef DEBUG
-        debug_log("Moving variable %s (%p) to stack %s", new->name, new, (head->name == NULL) ? "\e[1mdefault\e[0m" : head->name);
-    #endif // DEBUG
+    if(debug) debug_log("Moving variable %s (%p) to stack %s", new->name, new, (head->name == NULL) ? "\e[1mdefault\e[0m" : head->name);
 
     // reach the end of the linked list
     Variable *last = head;
